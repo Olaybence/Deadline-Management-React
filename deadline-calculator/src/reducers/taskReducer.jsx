@@ -1,5 +1,8 @@
-import { orderTasksByDeadline, calculateSchedule } from '../algorithms/algorithms';
-import { initialTasks, initialSchedule } from '../assets/data';
+import {
+  orderTasksByDeadline,
+  calculateSchedule,
+} from "../algorithms/algorithms";
+import { initialTasks } from "../assets/data";
 
 // Actiontypes
 export const ADD_TASK = "ADD_TASK";
@@ -60,7 +63,7 @@ const taskReducer = (state = initialTaskState(), action) => {
   let newTasks = state.tasks;
   switch (action.type) {
     case ADD_TASK:
-      newTasks.push({ ...action.task, id: state.nextId })
+      newTasks.push({ ...action.task, id: state.nextId });
       newTasks = orderTasksByDeadline(newTasks);
       res = {
         ...state,
@@ -70,7 +73,9 @@ const taskReducer = (state = initialTaskState(), action) => {
       };
       return res;
     case REMOVE_TASK:
-      newTasks = orderTasksByDeadline(newTasks.filter((item) => item.id !== action.id));
+      newTasks = orderTasksByDeadline(
+        newTasks.filter((item) => item.id !== action.id)
+      );
       return {
         ...state,
         tasks: newTasks,
@@ -101,8 +106,8 @@ function saveData(data) {
   // Save data to a cookie
   console.log("save data: number of tasks:", data.tasks.length);
   if (data) {
-    localStorage.setItem("initialTaskState", JSON.stringify(data));
-  } else localStorage.removeItem("initialTaskState");
+    localStorage.setItem("savedTaskState", JSON.stringify(data));
+  } else localStorage.removeItem("savedTaskState");
 }
 
 /**
@@ -117,16 +122,19 @@ function saveData(data) {
  *  */
 function loadData() {
   // Retrieve data from a cookie
-  const savedData = localStorage.getItem("initialTaskState");
+  const savedData = localStorage.getItem("savedTaskState");
+  console.log("savedData", savedData);
   if (savedData) {
     let res = JSON.parse(savedData);
-    res.map((task) => {
-      let taskTemp = task;
-      taskTemp.turnaroundTime = Number(task.turnaroundTime);
-      return taskTemp;
-    });
+    console.log("res", res);
+    // res.tasks.map((task) => {
+    //   let taskTemp = task;
+    //   taskTemp.turnaroundTime = Number(task.turnaroundTime);
+    //   return taskTemp;
+    // });
   } else return null;
 }
+
 /**
  * Search for an index that is bigger than all of existing.
  * @param {Task[]} tasks
@@ -141,4 +149,3 @@ function calculateNextId(tasks) {
 }
 
 export default taskReducer;
- 

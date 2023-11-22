@@ -1,3 +1,4 @@
+import { priorities } from "../assets/data";
 import { ADD_TASK } from "../reducers/taskReducer";
 import "./AddTask.css";
 import { useDispatch } from "react-redux";
@@ -13,6 +14,7 @@ export default function AddTask() {
     const fd = new FormData(event.target);
     const task = Object.fromEntries(fd.entries());
     task.turnaroundTime = Number(task.turnaroundTime);
+    task.priority = Number(task.priority);
 
     // Store the task, and put it in our schedule.
     console.log("task", task);
@@ -52,6 +54,18 @@ export default function AddTask() {
             required
             min="0" // Can't submit negative times
           ></input>
+        </div>
+      </div>
+      <div className="control-row">
+        
+        <div className="control text">
+          <label htmlFor="priority">Priority:</label>
+          <select id="priority" name="priority" required>
+            <option value="0">{priorities[0]}</option>
+            <option value="1">{priorities[1]}</option>
+            <option value="2">{priorities[2]}</option>
+            <option value="3">{priorities[3]}</option>
+          </select>
         </div>
       </div>
       <p className="form-actions">

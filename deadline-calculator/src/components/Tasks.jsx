@@ -1,6 +1,7 @@
 import { useSelector } from "react-redux";
 import "./Tasks.css";
 import { weekdaysMin } from "moment";
+import { priorities } from "../assets/data";
 
 export default function Tasks() {
   /**
@@ -17,6 +18,7 @@ export default function Tasks() {
           <th>ID</th>
           <th>Task name</th>
           <th>Turnaround</th>
+          <th>Priority</th>
           <th>Deadline</th>
         </tr>
       </thead>
@@ -26,6 +28,7 @@ export default function Tasks() {
             <td>{item.id}</td>
             <td>{item.name}</td>
             <td>{item.turnaroundTime}</td>
+            <td>{priorities[item.priority]}</td>
             <td>{item.deadline} ({weekdaysMin(new Date(item.deadline).getDay())})</td>
           </tr>
         ))}

@@ -1,17 +1,10 @@
 import { combineReducers, createStore } from "redux";
 import taskReducer from "../reducers/taskReducer";
-import scheduleReducer from "../reducers/scheduleReducer";
+
+//TODO: Use Redux Toolkit
 
 const store = combineReducers({
-  taskReducer: taskReducer,
-  scheduleReducer: scheduleReducer
+  taskReducer: taskReducer
 });
 
 export default createStore(store);
-
-
-// const taskSubscriber = () => {
-//   console.log("taskSubscriber getState:", store.getState());
-// };
-
-// store.subscribe(taskSubscriber());

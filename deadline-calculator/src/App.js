@@ -12,13 +12,15 @@ export const LIST = "LIST";
 export const SCHEDULE = "SCHEDULE";
 function App() {
   const [displayToggle, setDisplayToggle] = useState(SCHEDULE);
-  
   return (
     <>
       <Header />
       <AddTask />
-      <DisplayToggle displayToggle={displayToggle} handleToggle={setDisplayToggle} />
-      {displayToggle === SCHEDULE ? <Schedule /> : <Tasks/>}
+      <DisplayToggle
+        displayToggle={displayToggle}
+        handleToggle={setDisplayToggle}
+      />
+      {displayToggle === SCHEDULE ? <Schedule /> : <Tasks />}
     </>
   );
 }

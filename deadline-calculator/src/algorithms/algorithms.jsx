@@ -125,6 +125,7 @@ function calculateItem(task, remainingTime, progressDay) {
   const res = {
     taskId: task.id,
     taskName: task.name,
+    taskPriority: task.priority,
     turnaroundTime: task.turnaroundTime,
     startDate: Moment(progressDay).format(dateFormat),
     endDate: Moment(addDays(progressDay, timeSpent.length - 1)).format(
@@ -221,14 +222,13 @@ function getTodaysRemaining() {
  * @returns {Number[]}
  */
 function calculateTimeArray(startDate, turnaroundTime, remainingStartdayTime) {
-  console.log("calculateTimeArray -------------- timeArray", turnaroundTime <= remainingStartdayTime, startDate, turnaroundTime, remainingStartdayTime);
+  
   // Single-day task
   if (turnaroundTime <= remainingStartdayTime) return [turnaroundTime];
 
   // Multi-day task (at least 2 days)
   let timeArray = [];
   if(remainingStartdayTime !== 0) timeArray.push(remainingStartdayTime);
-  console.log("timeArray1",timeArray);
   
   let remainingTime = turnaroundTime - remainingStartdayTime;
 
@@ -237,14 +237,10 @@ function calculateTimeArray(startDate, turnaroundTime, remainingStartdayTime) {
   const startDay = getOwnDay(startDate);
 
   // If can be finished in the current week
-  console.log("timeArray overweek",startDay + furtherDaysNeeded + (lastDayWorkHours > 0 ? 1 : 0) <= 5);
-  console.log("timeArray startDay , furtherDaysNeeded , (lastDayWorkHours > 0 ? 1 : 0)",startDay , furtherDaysNeeded , (lastDayWorkHours > 0 ? 1 : 0));
   if (startDay + furtherDaysNeeded + (lastDayWorkHours > 0 ? 1 : 0) <= 5) {
     if (furtherDaysNeeded > 0)
       timeArray = timeArray.concat(Array(furtherDaysNeeded).fill(workhours));
-      console.log("timeArray2",timeArray);
     if (lastDayWorkHours > 0) timeArray.push(lastDayWorkHours);
-    console.log("timeArray3",timeArray);
     return timeArray;
     // Goes over weeks
   } else {
@@ -256,10 +252,8 @@ function calculateTimeArray(startDate, turnaroundTime, remainingStartdayTime) {
     // Take the time of this week
     let thisWeek = furtherTimes.slice(0, daysLeftOnTheWeek);
     if (daysLeftOnTheWeek > 0) timeArray = timeArray.concat(thisWeek);
-    console.log("timeArray4",timeArray);
     // Add weekend
     timeArray = timeArray.concat([0, 0]);
-    console.log("timeArray5",timeArray);
 
     const remainingTime = furtherTimes.slice(
       daysLeftOnTheWeek,
@@ -271,10 +265,9 @@ function calculateTimeArray(startDate, turnaroundTime, remainingStartdayTime) {
         .concat(remainingTime.slice(i, i + 5))
         .concat([0, 0]);
       i += 5;
-      console.log("timeArray6",timeArray);
     }
     timeArray = timeArray.concat(remainingTime.slice(i, remainingTime.length));
-    console.log("timeArray7",timeArray);
+    console.log("timeArray",timeArray);
     return timeArray;
   }
 }

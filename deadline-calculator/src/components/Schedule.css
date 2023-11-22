@@ -1,5 +1,6 @@
 /* TODO: Adjust the size of columns */
 .schedule {
+    height: 100%;
     width: 95%;
     margin: 20px auto;
     border-collapse: collapse;
@@ -10,7 +11,7 @@
 .schedule thead th {
     font-size: large;
     text-wrap: wrap;
-    height: 60px;
+    height: 1.5rem;
 }
 
 .schedule th, .schedule td {

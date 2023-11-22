@@ -36,18 +36,28 @@ export default function Schedule() {
             <td>{item.taskName}</td>
             <td>{item.turnaroundTime}</td>
             <td>{priorities[item.taskPriority]}</td>
-            <td>{item.startDate} ({weekdaysMin(new Date(item.startDate).getDay())})</td>
-            <td>{item.endDate} ({weekdaysMin(new Date(item.endDate).getDay())})</td>
+            <td>
+              {item.startDate} ({weekdaysMin(new Date(item.startDate).getDay())}
+              )
+            </td>
+            <td>
+              {item.endDate} ({weekdaysMin(new Date(item.endDate).getDay())})
+            </td>
             {/* <td>{item.remainingTime}</td> */}
             <td>
-              {item.timeSpent.slice(0,item.timeSpent.length-1)
-                .map((spentHours,i) => (
+              {item.timeSpent
+                .slice(0, item.timeSpent.length - 1)
+                .map((spentHours, i) => (
                   <span key={i}>{spentHours}; </span>
-                  ))}
-                  <span>{item.timeSpent[item.timeSpent.length-1]}</span>
+                ))}
+              <span>{item.timeSpent[item.timeSpent.length - 1]}</span>
             </td>
             <td>{item.deadline}</td>
-            <td>On Time | Not enough time</td>
+            {item.endDate < item.deadline ? (
+              <td>On Time</td>
+            ) : (
+              <td>Not enough time</td>
+            )}
           </tr>
         ))}
       </tbody>
