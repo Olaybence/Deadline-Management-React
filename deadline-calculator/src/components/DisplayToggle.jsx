@@ -1,22 +1,27 @@
-import { CALENDAR, LIST } from "../App";
+import "./DisplayToggle.css";
+import { LIST, SCHEDULE } from "../App";
 
-export default function DisplayToggle({ displayToggle }) {
+export default function DisplayToggle({ displayToggle, handleToggle }) {
   return (
-    <div>
-      <label htmlFor="list">List</label>
-      <input
-        type="radio"
-        id="list"
-        name="displayToggle"
-        onChange={() => displayToggle(LIST)}
-      />
-      <label htmlFor="calendar">Calendar</label>
-      <input
-        type="radio"
-        id="calendar"
-        name="displayToggle"
-        onChange={() => displayToggle(CALENDAR)}
-      />
+    <div className="middle">
+      <div className="radio-toggle">
+        <input
+          type="radio"
+          id="list"
+          name="displayToggle"
+          checked={displayToggle === LIST}
+          onChange={() => handleToggle(LIST)}
+        />
+        <label htmlFor="list">List</label>
+        <input
+          type="radio"
+          id="schedule"
+          name="displayToggle"
+          checked={displayToggle === SCHEDULE}
+          onChange={() => handleToggle(SCHEDULE)}
+        />
+        <label htmlFor="schedule">Schedule</label>
+      </div>
     </div>
   );
 }

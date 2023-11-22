@@ -1,78 +1,84 @@
-import {
-  ADD_TASK,
-  FETCH_DATA,
-  REMOVE_TASK,
-  SAVE_DATA,
-} from "../actions/taskActions";
+import { orderTasksByDeadline, calculateSchedule } from '../algorithms/algorithms';
+import { initialTasks, initialSchedule } from '../assets/data';
+
+// Actiontypes
+export const ADD_TASK = "ADD_TASK";
+export const REMOVE_TASK = "REMOVE_TASK";
+
+export const FETCH_DATA = "FETCH_DATA";
+export const SAVE_DATA = "SAVE_DATA";
 
 const initialTaskState = () => {
   // Try to load in from cache
-  // const loaded = loadData();
-  // console.log("loaded data", loaded);
-  // if (loaded) return loaded;
+  const loaded = loadData();
+  console.log("loaded data", loaded);
+  if (loaded) {
+    if (!loaded.nextId) calculateNextId(loaded.tasks);
+    return loaded;
+  }
 
   // Default values
-  return {
+  const state = {
     /**
+     * TODO: Put this into a backend (Bence: I would prefer a Java Spring + REST API)
      * List of tasks inordered.
      * It is only for storing them
      */
-    tasks: [
-      {
-        name: "Project phase 3",
-        turnaroundTime: 10,
-        deadline: "2023-11-30",
-        collision: false,
-        id: 0,
-      },
-      {
-        name: "Project phase 1",
-        turnaroundTime: 7,
-        deadline: "2023-11-23",
-        id: 1,
-      },
-      {
-        name: "Project phase 2",
-        turnaroundTime: 12,
-        deadline: "2023-11-25",
-        id: 2,
-      },
-    ],
+    tasks: initialTasks,
     nextId: 3,
+    schedule: initialSchedule,
   };
+  state.tasks = orderTasksByDeadline(state.tasks);
+  state.schedule = calculateSchedule(state.tasks);
+  return state;
 };
+
+// TODO: Use Redux Toolkit for cleaner code.
+// Initial use of Redux Toolkit:
+// createSlice({
+//   name: "task",
+//   initialState: initialTaskState,
+//   reducers: {
+//     addTask(state, action) {
+//       state.tasks.push(action.task);
+//     },
+//     removeTask(state, action) {
+//       state.tasks.filter((item) => item.id !== action.id)
+//     },
+//     fetchData(state) {
+
+//     },
+//     saveData(state) {
+
+//     },
+//   }
+// });
 
 const taskReducer = (state = initialTaskState(), action) => {
   console.log("taskReducer state", state, " action", action);
-  console.log("taskReducer state.tasks", state.tasks);
-
-  let asd = state.nextId + 1;
-  console.log(
-    "taskReducer state.nextId",
-    state.nextId,
-    "| state.nextId +1:",
-    asd
-  );
   let res = {};
+  let newTasks = state.tasks;
   switch (action.type) {
     case ADD_TASK:
-      state.tasks.push({ ...action.task, id: state.nextId });
+      newTasks.push({ ...action.task, id: state.nextId });
       res = {
         ...state,
-        tasks: state.tasks,
+        tasks: orderTasksByDeadline(newTasks),
         nextId: state.nextId + 1,
+        schedule: calculateSchedule(newTasks),
       };
-      console.log("taskReducer", res);
       return res;
     case REMOVE_TASK:
+      newTasks.filter((item) => item.id !== action.id);
       return {
         ...state,
-        tasks: state.tasks.filter((item) => item.id !== action.taskId),
+        tasks: orderTasksByDeadline(newTasks),
+        schedule: calculateSchedule(newTasks),
       };
     case FETCH_DATA:
       res = {
         ...state,
-        tasks: action.tasks,
+        tasks: orderTasksByDeadline(newTasks.concat(action.tasks)),
       };
       return res;
     case SAVE_DATA:
@@ -84,45 +90,11 @@ const taskReducer = (state = initialTaskState(), action) => {
 };
 
 /**
- * It calculates the order by simply order them by deadline,
- * and from now on continously work one-by-one.
- * @returns Returns an ordered list in which we need to solve the given tasks.
- */
-function calculateSchedule(tasks) {
-  let schedule = [tasks.at(0)];
-  tasks.slice(1).forEach((task) => {
-    let placed = false;
-    let i = 0;
-    while (!placed && i < schedule.length) {
-      const compTask = schedule[i];
-      if (task.deadline < Date.now()) {
-        // Already overdue
-        // TODO: COOP WITH OVERDUE AS THEY SAID
-        console.log("overdue!!!", task);
-        placed = true;
-      } else if (task.deadline < compTask.deadline) {
-        console.log("result:", task.deadline, "<", compTask.deadline);
-        schedule = schedule.slice(0, i).concat([task], schedule.slice(i));
-        placed = true;
-      }
-      i++;
-    }
-    if (!placed) {
-      schedule.push(task);
-    }
-
-    console.log("added");
-    // schedule.map((task,i) => console.log("task", i ,":", task.name, task.deadline));
-  });
-
-  console.log("schedule", schedule);
-  return schedule;
-}
-
-/**
  * Save data to local storage
  *
  * Note that if the database would be much bigger, the favorites should be saved only.
+ * TODO: TEST THIS
+ * - check if it saves or not.
  *  */
 function saveData(data) {
   // Save data to a cookie
@@ -136,12 +108,35 @@ function saveData(data) {
  * Retrieve data from local storage
  *
  * Note that if the database would be much bigger, the favorites should be saved only.
- * Then, this part should also remove the favorites from the all list
+ * Then, this part should also remove the favorites from the all list.
+ * Warning: These values are strings (turnaroundTime as well!!!)
+ * TODO: TEST THIS
+ * - check if it loads or not.
+ * @returns {Task[]} loaded tasks from localStorage
  *  */
 function loadData() {
   // Retrieve data from a cookie
   const savedData = localStorage.getItem("initialTaskState");
-  return savedData ? JSON.parse(savedData) : null;
+  if (savedData) {
+    let res = JSON.parse(savedData);
+    res.map((task) => {
+      let taskTemp = task;
+      taskTemp.turnaroundTime = Number(task.turnaroundTime);
+      return taskTemp;
+    });
+  } else return null;
+}
+/**
+ * Search for an index that is bigger than all of existing.
+ * @param {Task[]} tasks
+ * @returns {Number} Next available index.
+ */
+function calculateNextId(tasks) {
+  let nextId = 0;
+  tasks.forEach((task) => {
+    if (task.id > nextId) nextId = task.id + 1;
+  });
+  return nextId;
 }
 
 export default taskReducer;

@@ -1,6 +1,11 @@
+import { useSelector } from "react-redux";
 import "./CalendarContainer.css";
 
+// TODO: Add the schedule items to the calendar for better visuals
+
 export default function CalendarContainer() {
+  const schedule = useSelector((state) => state.taskReducer.schedule);
+  
   return (
     <>
       <div className="month">
@@ -68,6 +73,7 @@ export default function CalendarContainer() {
           <li>31</li>
         </ul>
       </div>
+      {Content}
     </>
   );
 }

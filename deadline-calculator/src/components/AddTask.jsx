@@ -1,6 +1,6 @@
-import { ADD_TASK } from "../actions/taskActions";
+import { ADD_TASK } from "../reducers/taskReducer";
 import "./AddTask.css";
-import { useDispatch } from 'react-redux';
+import { useDispatch } from "react-redux";
 
 export default function AddTask() {
   const dispatch = useDispatch();
@@ -12,10 +12,11 @@ export default function AddTask() {
     // console.log("handleSubmit", enteredValues);
     const fd = new FormData(event.target);
     const task = Object.fromEntries(fd.entries());
+    task.turnaroundTime = Number(task.turnaroundTime);
 
     // Store the task, and put it in our schedule.
     console.log("task", task);
-    dispatch({type: ADD_TASK, task: task});
+    dispatch({ type: ADD_TASK, task: task });
     // tasks = calculateSchedule();
     event.target.reset();
   }
@@ -25,10 +26,19 @@ export default function AddTask() {
       <h2>Add new Task</h2>
 
       <div className="control-row">
-        <div className="control no-margin">
+        <div className="control text">
           <label>What is your task?</label>
-          <input id="title" type="text" name="title" minLength={3} maxLength={30} required></input>
+          <input
+            id="name"
+            type="text"
+            name="name"
+            minLength={3}
+            maxLength={30}
+            required
+          ></input>
         </div>
+      </div>
+      <div className="control-row">
         <div className="control no-margin">
           <label>Deadline: </label>
           <input id="deadline" type="date" name="deadline" required></input>
@@ -36,9 +46,9 @@ export default function AddTask() {
         <div className="control no-margin">
           <label>Estimated turnaround time (in hours): </label>
           <input
-            id="turnaround"
+            id="turnaroundTime"
             type="number"
-            name="turnaround"
+            name="turnaroundTime"
             required
             min="0" // Can't submit negative times
           ></input>
