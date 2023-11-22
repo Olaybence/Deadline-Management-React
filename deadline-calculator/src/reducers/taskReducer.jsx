@@ -17,6 +17,7 @@ const initialTaskState = () => {
     return loaded;
   }
 
+  const initTasksOrdered = orderTasksByDeadline(initialTasks);
   // Default values
   const state = {
     /**
@@ -24,12 +25,11 @@ const initialTaskState = () => {
      * List of tasks inordered.
      * It is only for storing them
      */
-    tasks: initialTasks,
-    nextId: 3,
-    schedule: initialSchedule,
+    tasks: initTasksOrdered,
+    nextId: calculateNextId(initialTasks),
+    schedule: calculateSchedule(initTasksOrdered),
+    // schedule: initialSchedule,
   };
-  state.tasks = orderTasksByDeadline(state.tasks);
-  state.schedule = calculateSchedule(state.tasks);
   return state;
 };
 
@@ -60,19 +60,20 @@ const taskReducer = (state = initialTaskState(), action) => {
   let newTasks = state.tasks;
   switch (action.type) {
     case ADD_TASK:
-      newTasks.push({ ...action.task, id: state.nextId });
+      newTasks.push({ ...action.task, id: state.nextId })
+      newTasks = orderTasksByDeadline(newTasks);
       res = {
         ...state,
-        tasks: orderTasksByDeadline(newTasks),
+        tasks: newTasks,
         nextId: state.nextId + 1,
         schedule: calculateSchedule(newTasks),
       };
       return res;
     case REMOVE_TASK:
-      newTasks.filter((item) => item.id !== action.id);
+      newTasks = orderTasksByDeadline(newTasks.filter((item) => item.id !== action.id));
       return {
         ...state,
-        tasks: orderTasksByDeadline(newTasks),
+        tasks: newTasks,
         schedule: calculateSchedule(newTasks),
       };
     case FETCH_DATA:
@@ -134,9 +135,10 @@ function loadData() {
 function calculateNextId(tasks) {
   let nextId = 0;
   tasks.forEach((task) => {
-    if (task.id > nextId) nextId = task.id + 1;
+    if (task.id >= nextId) nextId = task.id + 1;
   });
   return nextId;
 }
 
 export default taskReducer;
+ 

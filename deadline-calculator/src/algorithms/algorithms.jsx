@@ -12,6 +12,7 @@ export const dateFormat = "YYYY-MM-DD";
  * This implements the quicksort algorithm with O(N*logN) time and n space
  */
 export function orderTasksByDeadline(tasks) {
+  console.log("orderTasksByDeadline tasks",tasks)
   let orderedTasks = [tasks.at(0)];
   tasks.slice(1).forEach((task) => {
     let placed = false;
@@ -21,10 +22,9 @@ export function orderTasksByDeadline(tasks) {
       if (task.deadline < Date.now()) {
         // Already overdue
         // TODO: COOP WITH OVERDUE AS THEY SAID
-        console.log("overdue!!!", task);
+        console.warning("OVERDUE:", task);
         placed = true;
       } else if (task.deadline < compTask.deadline) {
-        console.log("result:", task.deadline, "<", compTask.deadline);
         orderedTasks = orderedTasks
           .slice(0, i)
           .concat([task], orderedTasks.slice(i));
@@ -36,7 +36,6 @@ export function orderTasksByDeadline(tasks) {
       orderedTasks.push(task);
     }
 
-    console.log("added", task);
   });
 
   console.log("orderedTasks", orderedTasks);
@@ -64,8 +63,8 @@ export function calculateSchedule(tasks) {
  *        turnaroundTime: Number,
  *        startDate: String "YYYY-MM-DD",
  *        endDate: String "YYYY-MM-DD",
- *        remainingTime: Number,
- *        timeSpent: Number[],
+ *        remainingTime: Number, The time left AFTER the given task
+ *        timeSpent: Number[], The time spent each day with the given task
  *        deadline: Date "YYYY-MM-DD",
  *    }
  * @param {Task[]} tasks
@@ -122,46 +121,10 @@ function calculateItem(task, remainingTime, progressDay) {
   console.log("calculateItem task, remainingTime, progressDay", task, remainingTime, progressDay);
   // Time needed each day
   let timeSpent = calculateTimeArray(progressDay,task.turnaroundTime,remainingTime);
-  // let requiredTime = task.turnaroundTime;
-  // let lastDayWorkHours;
-  // Can I finish it on startDay?
-  // if (requiredTime < remainingTime) {
-  //   timeSpent = [requiredTime];
-  //   lastDayWorkHours = 0;
-
-  //   console.log("calculateItem - requiredTime", requiredTime);
-  //   console.log("calculateItem - remainingTime", remainingTime);
-  //   console.log("calculateItem - lastDayWorkHours", lastDayWorkHours);
-  // }
-  // // More days required
-  // else if (remainingTime < requiredTime) {
-  //   if (remainingTime !== 0) {
-  //     // Take that day's remaining
-  //     timeSpent.push(remainingTime);
-  //     requiredTime -= remainingTime;
-  //   }
-
-  //   // Add full days if needed
-  //   const fullDays = Math.floor(requiredTime / workhours);
-  //   console.log("fullDays", fullDays);
-  //   if (fullDays > 0)
-  //     timeSpent = timeSpent.concat(Array(fullDays).fill(workhours));
-
-  //   // Take the rest for the last if needed
-  //   lastDayWorkHours = requiredTime % workhours;
-  //   if (lastDayWorkHours === 0) {
-  //     // Finished at the end of the day
-  //     nextRemainingTime = 0;
-  //   } else {
-  //     // Some spare time left at the last day of the task
-  //     timeSpent.push(lastDayWorkHours);
-  //     nextRemainingTime = workhours - lastDayWorkHours;
-  //   }
-  //   // Calculate the next remaining
-  // }
   
   const res = {
     taskId: task.id,
+    taskName: task.name,
     turnaroundTime: task.turnaroundTime,
     startDate: Moment(progressDay).format(dateFormat),
     endDate: Moment(addDays(progressDay, timeSpent.length - 1)).format(
@@ -171,10 +134,6 @@ function calculateItem(task, remainingTime, progressDay) {
     timeSpent: timeSpent,
     deadline: task.deadline,
   };
-  console.log("BENCE " + task.id + " remainingTime - timeSpent[timeSpent.length-1]", remainingTime - timeSpent[timeSpent.length-1]);
-  console.log("BENCE " + task.id + " timeSpent.length > 1", timeSpent.length > 1);
-  console.log("BENCE " + task.id + " workhours - timeSpent[timeSpent.length-1]", workhours - timeSpent[timeSpent.length-1]);
-  console.log("BENCE " + task.id + " res", res);
   return res;
 }
 

@@ -17,18 +17,21 @@ export default function Schedule() {
       <thead>
         <tr key={-1}>
           <th>ID</th>
-          <th>turnaround time (h)</th>
-          <th>start date</th>
-          <th>end date</th>
-          <th>remaining time (h)</th>
-          <th>time spent (h/day)</th>
-          <th>deadline</th>
+          <th>Title</th>
+          <th>Turnaround time (h)</th>
+          <th>Start date</th>
+          <th>End date</th>
+          <th>Remaining time (h)</th>
+          <th>Time spent (h/day)</th>
+          <th>Deadline</th>
+          <th>Status</th>
         </tr>
       </thead>
       <tbody>
         {schedule.map((item) => (
           <tr key={item.taskId}> {/* TODO: RUNTIME ERROR: KEY WARNING */}
             <td>{item.taskId}</td>
+            <td>{item.taskName}</td>
             <td>{item.turnaroundTime}</td>
             <td>{item.startDate} ({weekdaysMin(new Date(item.startDate).getDay())})</td>
             <td>{item.endDate} ({weekdaysMin(new Date(item.endDate).getDay())})</td>
@@ -41,6 +44,7 @@ export default function Schedule() {
                   <span>{item.timeSpent[item.timeSpent.length-1]}</span>
             </td>
             <td>{item.deadline}</td>
+            <td>On Time | Not enough time</td>
           </tr>
         ))}
       </tbody>
