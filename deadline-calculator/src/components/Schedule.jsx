@@ -1,6 +1,7 @@
 import { useSelector } from "react-redux";
 import "./Schedule.css";
 import { weekdaysMin } from "moment";
+import { priorities } from "../assets/data";
 
 export default function Schedule() {
   /**
@@ -19,9 +20,10 @@ export default function Schedule() {
           <th>ID</th>
           <th>Title</th>
           <th>Turnaround time (h)</th>
+          <th>Priority</th>
           <th>Start date</th>
           <th>End date</th>
-          <th>Remaining time (h)</th>
+          {/* <th>Remaining time (h)</th> */}
           <th>Time spent (h/day)</th>
           <th>Deadline</th>
           <th>Status</th>
@@ -29,17 +31,18 @@ export default function Schedule() {
       </thead>
       <tbody>
         {schedule.map((item) => (
-          <tr key={item.taskId}> {/* TODO: RUNTIME ERROR: KEY WARNING */}
+          <tr key={item.taskId}>
             <td>{item.taskId}</td>
             <td>{item.taskName}</td>
             <td>{item.turnaroundTime}</td>
+            <td>{priorities[item.taskPriority]}</td>
             <td>{item.startDate} ({weekdaysMin(new Date(item.startDate).getDay())})</td>
             <td>{item.endDate} ({weekdaysMin(new Date(item.endDate).getDay())})</td>
-            <td>{item.remainingTime}</td>
+            {/* <td>{item.remainingTime}</td> */}
             <td>
               {item.timeSpent.slice(0,item.timeSpent.length-1)
-                .map((spentHours) => (
-                  <span>{spentHours}; </span>
+                .map((spentHours,i) => (
+                  <span key={i}>{spentHours}; </span>
                   ))}
                   <span>{item.timeSpent[item.timeSpent.length-1]}</span>
             </td>
