@@ -14,7 +14,7 @@ export const SAVE_DATA = "SAVE_DATA";
 const initialTaskState = () => {
   // Try to load in from cache
   const loaded = loadData();
-  console.log("loaded data", loaded);
+  // console.log("loaded data", loaded);
   if (loaded) {
     if (!loaded.nextId) calculateNextId(loaded.tasks);
     return loaded;
@@ -58,7 +58,7 @@ const initialTaskState = () => {
 // });
 
 const taskReducer = (state = initialTaskState(), action) => {
-  console.log("taskReducer state", state, " action", action);
+  // console.log("taskReducer state", state, " action", action);
   let res = {};
   let newTasks = state.tasks;
   switch (action.type) {
@@ -104,7 +104,7 @@ const taskReducer = (state = initialTaskState(), action) => {
  *  */
 function saveData(data) {
   // Save data to a cookie
-  console.log("save data: number of tasks:", data.tasks.length);
+  // console.log("save data: number of tasks:", data.tasks.length);
   if (data) {
     localStorage.setItem("savedTaskState", JSON.stringify(data));
   } else localStorage.removeItem("savedTaskState");
@@ -123,15 +123,16 @@ function saveData(data) {
 function loadData() {
   // Retrieve data from a cookie
   const savedData = localStorage.getItem("savedTaskState");
-  console.log("savedData", savedData);
+  // console.log("savedData", savedData);
   if (savedData) {
     let res = JSON.parse(savedData);
-    console.log("res", res);
+    // console.log("res", res);
     // res.tasks.map((task) => {
     //   let taskTemp = task;
     //   taskTemp.turnaroundTime = Number(task.turnaroundTime);
     //   return taskTemp;
     // });
+    return res;
   } else return null;
 }
 

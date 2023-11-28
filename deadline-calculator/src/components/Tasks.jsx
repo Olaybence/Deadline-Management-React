@@ -2,13 +2,15 @@ import { useSelector } from "react-redux";
 import "./Tasks.css";
 import { weekdaysMin } from "moment";
 import { priorities } from "../assets/data";
+import { orderTasksByID } from "../algorithms/algorithms";
 
 export default function Tasks() {
   /**
    * List of tasks inordered.
    * It is only for storing them
    */
-  const tasks = useSelector((state) => state.taskReducer.tasks);
+  let tasks = useSelector((state) => state.taskReducer.tasks);
+  tasks = orderTasksByID(tasks);
 
   console.log("tasks", tasks);
   return (
