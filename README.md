@@ -1,5 +1,3 @@
-# Assessment description
-
 # This program is for an assessment with the following instructions:
 
 # Developer Task
