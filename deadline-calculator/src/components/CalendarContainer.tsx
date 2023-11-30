@@ -1,11 +1,12 @@
-import { useSelector } from "react-redux";
+// import { useSelector } from "react-redux";
 import "./CalendarContainer.css";
 
 // TODO: Add the schedule items to the calendar for better visuals
 
 export default function CalendarContainer() {
-  const schedule = useSelector((state) => state.taskReducer.schedule);
-  
+  // TODO: use it
+  // const schedule = useSelector((state: any) => state.schedule);
+  const Content = <p>No Task for today!</p>;
   return (
     <>
       <div className="month">

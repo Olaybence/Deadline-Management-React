@@ -1,9 +1,6 @@
-import Moment from "moment";
-
-export const workhours = 8;
-export const dateFormat = "YYYY-MM-DD";
-
 // TODO: Idea - Create an object for date manipulations
+
+import { Schedule, Task, addDays, getOwnDay, workhours } from "../assets/util";
 
 // TODO: TEST THIS
 /**
@@ -11,15 +8,17 @@ export const dateFormat = "YYYY-MM-DD";
  * Compare them one-by-one and place them in the right place
  * This implements the quicksort algorithm with O(N*logN) time and n space
  */
-export function orderTasksByDeadline(tasks) {
+export function orderTasksByDeadline(tasks : Task[]) {
   // console.log("orderTasksByDeadline tasks",tasks)
-  let orderedTasks = [tasks.at(0)];
+  if(tasks.length === 0) return [];
+
+  let orderedTasks: Task[] = [tasks[0]];
   tasks.slice(1).forEach((task) => {
     let placed = false;
     let i = 0;
     while (!placed && i < orderedTasks.length) {
-      const compTask = orderedTasks[i];
-      if (task.deadline < Date.now()) {
+      const compTask: Task = orderedTasks[i];
+      if (task.deadline < new Date()) {
         // Already overdue
         // TODO: COOP WITH OVERDUE AS THEY SAID
         // console.warning("OVERDUE:", task);
@@ -47,9 +46,12 @@ export function orderTasksByDeadline(tasks) {
  * Compare them one-by-one and place them in the right place
  * This implements the quicksort algorithm with O(N*logN) time and n space
  */
-export function orderTasksByID(tasks) {
+export function orderTasksByID(tasks: Task[]) {
   // console.log("orderTasksByDeadline tasks",tasks)
-  let orderedTasks = [tasks.at(0)];
+  if(tasks.length === 0) return [];
+
+  let orderedTasks = [tasks[0]];
+
   tasks.slice(1).forEach((task) => {
     let placed = false;
     let i = 0;
@@ -83,30 +85,30 @@ export function orderTasksByID(tasks) {
  *
  * @returns Returns an ordered list in which we need to solve the given tasks.
  */
-export function calculateSchedule(tasks) {
+export function calculateSchedule(tasks: Task[]) {
   // console.log("BENCE calculateItem - calculateSchedule");
   return calculateScheduleLazy(tasks);
 }
 
 /**
  * Schedule: {
- *        taskId: Number,
- *        turnaroundTime: Number,
- *        startDate: String "YYYY-MM-DD",
- *        endDate: String "YYYY-MM-DD",
- *        remainingTime: Number, The time left AFTER the given task
- *        timeSpent: Number[], The time spent each day with the given task
- *        deadline: Date "YYYY-MM-DD",
+ *        
+ *        
+ *        
+ *        
+ *        
+ *        
+ *        
  *    }
  * @param {Task[]} tasks
  * @returns {Schedule[]} optimalized ordered schedule array
  */
-function calculateScheduleLazy(tasks) {
-  let schedule = [];
-  let progressDay = new Date().getHours() > 17 ? addDays(Date.now(),1) : Date.now();
+function calculateScheduleLazy(tasks: Task[]) {
+  let schedule: Schedule[] = [];
+  let progressDay = new Date().getHours() > 17 ? addDays(new Date(),1) : new Date();
   let remainingTime = getTodaysRemaining();
   // console.log("calculateScheduleLazy", tasks);
-  tasks.forEach((task) => {
+  tasks.forEach((task: Task) => {
 
     // Calculate the hours needed per days
     const timeArray = calculateTimeArray(
@@ -146,28 +148,27 @@ function calculateScheduleLazy(tasks) {
  * - Sum(timeSpent) = turnaroundTime
  *
  * @param {Task} task
- * @param {Number} remainingTime
+ * @param {number} remainingTime
  * @param {Date} progressDay
  * @returns {Schedule}
  */
-function calculateItem(task, remainingTime, progressDay) {
+function calculateItem(task: Task, remainingTime: number, progressDay: Date): Schedule {
   // console.log("calculateItem task, remainingTime, progressDay", task, remainingTime, progressDay);
   // Time needed each day
   let timeSpent = calculateTimeArray(progressDay,task.turnaroundTime,remainingTime);
-  
+
   const res = {
     taskId: task.id,
     taskName: task.name,
     taskPriority: task.priority,
     turnaroundTime: task.turnaroundTime,
-    startDate: Moment(progressDay).format(dateFormat),
-    endDate: Moment(addDays(progressDay, timeSpent.length - 1)).format(
-      dateFormat
-    ),
+    startDate: progressDay,
+    endDate: addDays(progressDay, timeSpent.length - 1),
     remainingTime: timeSpent.length > 1 ? workhours - timeSpent[timeSpent.length-1] : remainingTime - timeSpent[timeSpent.length-1],
     timeSpent: timeSpent,
     deadline: task.deadline,
   };
+  console.log("calculateItem res",res);
   return res;
 }
 
@@ -180,7 +181,7 @@ function calculateItem(task, remainingTime, progressDay) {
  * @param {Task} task - current task
  * @returns {Schedule[]} - new schedule resolving this conflict
  */
-function evaluatePriority(schedule, task) {
+function evaluatePriority(schedule: Schedule[], task: Task) {
   return schedule;
 }
 
@@ -191,9 +192,9 @@ function evaluatePriority(schedule, task) {
 
 /**
  * TODO: TEST THIS
- * @returns Return what is today's remaining workhours
+ * @returns {number} Return what is today's remaining workhours
  */
-function getTodaysRemaining() {
+function getTodaysRemaining(): number {
   if (new Date().getHours() < 9) {
     return 8;
   } else if (new Date().getHours() > 17) {
@@ -250,11 +251,11 @@ function getTodaysRemaining() {
 /**
  * 
  * @param {Date} startDate 
- * @param {Number} turnaroundTime 
- * @param {Number[]} remainingStartdayTime 
- * @returns {Number[]}
+ * @param {number} turnaroundTime 
+ * @param {number} remainingStartdayTime 
+ * @returns {number[]}
  */
-function calculateTimeArray(startDate, turnaroundTime, remainingStartdayTime) {
+function calculateTimeArray(startDate: Date, turnaroundTime: number, remainingStartdayTime: number) {
   
   // Single-day task
   if (turnaroundTime <= remainingStartdayTime) return [turnaroundTime];
@@ -303,29 +304,4 @@ function calculateTimeArray(startDate, turnaroundTime, remainingStartdayTime) {
     // console.log("timeArray",timeArray);
     return timeArray;
   }
-}
-
-/**
- * convert the default getDay(): Su-0 M-1 Tu-2 We-3 Th-4 Fr-5 Sa-6
- * into getOwnDay(): M-1 Tu-2 We-3 Th-4 Fr-5 Sa-6 Su-7
- * @param {Date} date
- * @returns
- */
-function getOwnDay(date) {
-  const day = new Date(date).getDay();
-  return day !== 0 ? day : 7;
-}
-
-/**
- * Add number of days to a given date.
- *
- * TODO: TEST THIS
- * @param {Date} date
- * @param {Date} days
- * @returns {Date} date + days
- */
-function addDays(date, days) {
-  let result = new Date(date);
-  result.setDate(result.getDate() + days);
-  return Moment(result).format(dateFormat);
 }

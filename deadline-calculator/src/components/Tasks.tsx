@@ -1,15 +1,16 @@
 import { useSelector } from "react-redux";
 import "./Tasks.css";
 import { weekdaysMin } from "moment";
-import { priorities } from "../assets/data";
+import { priorityStrings } from "../assets/data";
 import { orderTasksByID } from "../algorithms/algorithms";
+import { Task, dateFormatter } from "../assets/util";
 
 export default function Tasks() {
   /**
    * List of tasks inordered.
    * It is only for storing them
    */
-  let tasks = useSelector((state) => state.taskReducer.tasks);
+  let tasks = useSelector((state: any) => state.tasks);
   tasks = orderTasksByID(tasks);
 
   console.log("tasks", tasks);
@@ -25,13 +26,13 @@ export default function Tasks() {
         </tr>
       </thead>
       <tbody>
-        {tasks.map((item) => (
+        {tasks.map((item: Task) => (
           <tr key={item.id}>
             <td>{item.id}</td>
             <td>{item.name}</td>
             <td>{item.turnaroundTime}</td>
-            <td>{priorities[item.priority]}</td>
-            <td>{item.deadline} ({weekdaysMin(new Date(item.deadline).getDay())})</td>
+            <td>{priorityStrings[item.priority]}</td>
+            <td>{dateFormatter(item.deadline)} ({weekdaysMin(new Date(item.deadline).getDay())})</td>
           </tr>
         ))}
       </tbody>

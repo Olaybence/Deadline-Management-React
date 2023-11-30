@@ -1,14 +1,15 @@
 import { useSelector } from "react-redux";
-import "./Schedule.css";
+import "./ScheduleComponent.css";
 import { weekdaysMin } from "moment";
-import { priorities } from "../assets/data";
+import { priorityStrings } from "../assets/data";
+import { Schedule, dateFormatter } from "../assets/util";
 
-export default function Schedule() {
+export default function ScheduleComponent() {
   /**
    * List of tasks inordered.
    * It is only for storing them
    */
-  const schedule = useSelector((state) => state.taskReducer.schedule);
+  const schedule = useSelector((state: any) => state.schedule);
 
   // TODO: Check, why is this logged twice when switch to this tab (might be normal)
   // (Also true at Tasks.jsx)
@@ -30,18 +31,18 @@ export default function Schedule() {
         </tr>
       </thead>
       <tbody>
-        {schedule.map((item) => (
+        {schedule.map((item: Schedule) => (
           <tr key={item.taskId}>
             <td>{item.taskId}</td>
             <td>{item.taskName}</td>
             <td>{item.turnaroundTime}</td>
-            <td>{priorities[item.taskPriority]}</td>
+            <td>{priorityStrings[item.taskPriority]}</td>
             <td>
-              {item.startDate} ({weekdaysMin(new Date(item.startDate).getDay())}
+              {dateFormatter(item.startDate)} ({weekdaysMin(item.startDate.getDay())}
               )
             </td>
             <td>
-              {item.endDate} ({weekdaysMin(new Date(item.endDate).getDay())})
+              {dateFormatter(item.endDate)} ({weekdaysMin(new Date(item.endDate).getDay())})
             </td>
             {/* <td>{item.remainingTime}</td> */}
             <td>
@@ -52,7 +53,7 @@ export default function Schedule() {
                 ))}
               <span>{item.timeSpent[item.timeSpent.length - 1]}</span>
             </td>
-            <td>{item.deadline}</td>
+            <td>{dateFormatter(item.deadline)}</td>
             {item.endDate < item.deadline ? (
               <td>On Time</td>
             ) : (

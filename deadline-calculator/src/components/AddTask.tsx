@@ -1,20 +1,26 @@
-import { priorities } from "../assets/data";
+import { priorityStrings } from "../assets/data";
 import { ADD_TASK } from "../reducers/taskReducer";
 import "./AddTask.css";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 export default function AddTask() {
   const dispatch = useDispatch();
+  const nextId = useSelector((state: any) => state.nextId);
 
-  function handleSubmit(event) {
+
+  function handleSubmit(event: any) {
     // Stop the submit to get to the not yet existing server.
     event.preventDefault();
 
     // console.log("handleSubmit", enteredValues);
     const fd = new FormData(event.target);
-    const task = Object.fromEntries(fd.entries());
-    task.turnaroundTime = Number(task.turnaroundTime);
-    task.priority = Number(task.priority);
+    const taskObj = Object.fromEntries(fd.entries());
+    const task = {
+      ...taskObj,
+      turnaroundTime: Number(taskObj.turnaroundTime),
+      priority: Number(taskObj.priority),
+      id: nextId
+    }
 
     // Store the task, and put it in our schedule.
     console.log("task", task);
@@ -61,10 +67,10 @@ export default function AddTask() {
         <div className="control text">
           <label htmlFor="priority">Priority:</label>
           <select id="priority" name="priority" required>
-            <option value="0">{priorities[0]}</option>
-            <option value="1">{priorities[1]}</option>
-            <option value="2">{priorities[2]}</option>
-            <option value="3">{priorities[3]}</option>
+            <option value="0">{priorityStrings[0]}</option>
+            <option value="1">{priorityStrings[1]}</option>
+            <option value="2">{priorityStrings[2]}</option>
+            <option value="3">{priorityStrings[3]}</option>
           </select>
         </div>
       </div>

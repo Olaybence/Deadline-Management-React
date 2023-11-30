@@ -3,6 +3,7 @@ import {
   calculateSchedule,
 } from "../algorithms/algorithms";
 import { initialTasks } from "../assets/data";
+import { Schedule, Task } from "../assets/util";
 
 // Actiontypes
 export const ADD_TASK = "ADD_TASK";
@@ -14,7 +15,7 @@ export const SAVE_DATA = "SAVE_DATA";
 const initialTaskState = () => {
   // Try to load in from cache
   const loaded = loadData();
-  // console.log("loaded data", loaded);
+  console.log("loaded data", loaded);
   if (loaded) {
     if (!loaded.nextId) calculateNextId(loaded.tasks);
     return loaded;
@@ -57,7 +58,7 @@ const initialTaskState = () => {
 //   }
 // });
 
-const taskReducer = (state = initialTaskState(), action) => {
+const taskReducer = (state = initialTaskState(), action: any) => {
   // console.log("taskReducer state", state, " action", action);
   let res = {};
   let newTasks = state.tasks;
@@ -74,7 +75,7 @@ const taskReducer = (state = initialTaskState(), action) => {
       return res;
     case REMOVE_TASK:
       newTasks = orderTasksByDeadline(
-        newTasks.filter((item) => item.id !== action.id)
+        newTasks.filter((item: Task) => item.id !== action.id)
       );
       return {
         ...state,
@@ -102,7 +103,7 @@ const taskReducer = (state = initialTaskState(), action) => {
  * TODO: TEST THIS
  * - check if it saves or not.
  *  */
-function saveData(data) {
+function saveData(data: any) {
   // Save data to a cookie
   // console.log("save data: number of tasks:", data.tasks.length);
   if (data) {
@@ -127,11 +128,30 @@ function loadData() {
   if (savedData) {
     let res = JSON.parse(savedData);
     // console.log("res", res);
-    // res.tasks.map((task) => {
-    //   let taskTemp = task;
-    //   taskTemp.turnaroundTime = Number(task.turnaroundTime);
-    //   return taskTemp;
-    // });
+    res.tasks = res.tasks.map((taskRaw: any) => {
+      let task: Task = {
+        id: Number(taskRaw.id),
+        name: taskRaw.name,
+        priority: Number(taskRaw.priority),
+        deadline: new Date(taskRaw.deadline),
+        turnaroundTime: Number(taskRaw.turnaroundTime),
+      };
+      return task;
+    });
+    res.schedule = res.schedule.map((scheduleRaw: any, idx: number) => {
+      let schedule: Schedule = {
+        taskId: Number(scheduleRaw.taskId),
+        taskName: scheduleRaw.taskName,
+        taskPriority: Number(scheduleRaw.taskPriority),
+        turnaroundTime: Number(scheduleRaw.turnaroundTime),
+        startDate: new Date(scheduleRaw.startDate),
+        endDate: new Date(scheduleRaw.endDate),
+        remainingTime: Number(scheduleRaw.remainingTime),
+        timeSpent: scheduleRaw.timeSpent.map((item: string) => Number(item)),
+        deadline: new Date(scheduleRaw.deadline),
+      };
+      return schedule;
+    });
     return res;
   } else return null;
 }
@@ -141,7 +161,7 @@ function loadData() {
  * @param {Task[]} tasks
  * @returns {Number} Next available index.
  */
-function calculateNextId(tasks) {
+function calculateNextId(tasks: Task[]) {
   let nextId = 0;
   tasks.forEach((task) => {
     if (task.id >= nextId) nextId = task.id + 1;

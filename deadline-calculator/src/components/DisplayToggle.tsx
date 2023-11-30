@@ -2,8 +2,12 @@ import "./DisplayToggle.css";
 import { LIST, SCHEDULE } from "../App";
 import { useDispatch } from "react-redux";
 import { SAVE_DATA } from "../reducers/taskReducer";
+import React from "react";
 
-export default function DisplayToggle({ displayToggle, handleToggle }) {
+export const DisplayToggle: React.FC<{
+  displayToggle: string;
+  handleToggle: Function;
+}> = (props) => {
   const dispatch = useDispatch();
 
   return (
@@ -13,22 +17,27 @@ export default function DisplayToggle({ displayToggle, handleToggle }) {
           type="radio"
           id="list"
           name="displayToggle"
-          checked={displayToggle === LIST}
-          onChange={() => handleToggle(LIST)}
+          checked={props.displayToggle === LIST}
+          onChange={() => props.handleToggle(LIST)}
         />
         <label htmlFor="list">List</label>
         <input
           type="radio"
           id="schedule"
           name="displayToggle"
-          checked={displayToggle === SCHEDULE}
-          onChange={() => handleToggle(SCHEDULE)}
+          checked={props.displayToggle === SCHEDULE}
+          onChange={() => props.handleToggle(SCHEDULE)}
         />
         <label htmlFor="schedule">Schedule</label>
       </div>
       <div className="padding">
-        <button className="save-button" onClick={() => dispatch({ type: SAVE_DATA })}>Save</button>
+        <button
+          className="save-button"
+          onClick={() => dispatch({ type: SAVE_DATA })}
+        >
+          Save
+        </button>
       </div>
     </div>
   );
-}
+};

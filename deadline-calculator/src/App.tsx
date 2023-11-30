@@ -4,9 +4,9 @@ import "./App.css";
 import AddTask from "./components/AddTask";
 // import CalendarContainer from "./components/CalendarContainer";
 import Header from "./components/Header";
-import DisplayToggle from "./components/DisplayToggle";
 import Tasks from "./components/Tasks";
-import Schedule from "./components/Schedule";
+import ScheduleComponent from "./components/ScheduleComponent";
+import { DisplayToggle } from "./components/DisplayToggle";
 
 export const LIST = "LIST";
 export const SCHEDULE = "SCHEDULE";
@@ -20,7 +20,7 @@ function App() {
         displayToggle={displayToggle}
         handleToggle={setDisplayToggle}
       />
-      {displayToggle === SCHEDULE ? <Schedule /> : <Tasks />}
+      {displayToggle === SCHEDULE ? <ScheduleComponent /> : <Tasks />}
     </>
   );
 }
