@@ -11,7 +11,7 @@ export const DisplayToggle: React.FC<{
   const dispatch = useDispatch();
 
   return (
-    <div className="middle">
+    <div className="control-panel">
       <div className="radio-toggle">
         <input
           type="radio"

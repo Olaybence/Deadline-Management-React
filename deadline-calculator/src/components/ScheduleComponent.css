@@ -1,31 +1,72 @@
 /* TODO: Adjust the size of columns */
 .schedule {
-    height: 100%;
-    width: 95%;
-    margin: 20px auto;
-    border-collapse: collapse;
-    background-color: #253c3c;
-    color: #ffffff;
+  height: 100%;
+  width: 95%;
+  margin: 20px auto;
+  border-collapse: collapse;
+  background-color: #253c3c;
+  color: #ffffff;
+}
+
+.schedule thead th:nth-child(0) {
+  width: 2rem;
 }
 
 .schedule thead th {
-    font-size: large;
-    text-wrap: wrap;
-    height: 1.5rem;
+  font-size: large;
+  text-wrap: wrap;
+  height: 1.5rem;
 }
 
-.schedule th, .schedule td {
-    padding: 10px;
-    border: 1px solid #ffffff;
-    text-align: left;
+.schedule thead .clickable {
+  cursor: pointer;
+}
+
+.schedule thead .clickable:hover {
+  background-color: #147b73;
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+.schedule th,
+.schedule td {
+  padding: 10px;
+  border: 1px solid #ffffff;
+  text-align: left;
 }
 
 .schedule th {
-    background-color: #253c3c;
-    color: #ffffff;
+  background-color: #253c3c;
+  color: #ffffff;
 }
 
-.schedule tr:nth-child(odd) {
-    background-color: #ffffff;
-    color: #253c3c;
+.schedule tr {
+  transition: opacity 0.5s ease-out;
+  transition: height 0.5s ease-out;
+  overflow: hidden;
+}
+
+.schedule > tr.collapsed {
+  opacity: 0 !important;
+  max-height: 0 !important;
+}
+
+/* .schedule tr:nth-child(odd) {
+  background-color: #ffffff;
+  color: #253c3c;
+} */
+
+.sort-arrow-down {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 10px solid #fff; /* Change color as needed */
+  margin-left: 10px;
+  vertical-align: middle;
+}
+
+.delete-icon {
+  font-size: 1.8rem;
 }

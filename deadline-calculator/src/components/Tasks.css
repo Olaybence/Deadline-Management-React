@@ -1,30 +1,49 @@
 /* TODO: Adjust the size of columns */
 .tasks {
-    width: 80%;
-    margin: 20px auto;
-    border-collapse: collapse;
-    background-color: #253c3c;
-    color: #ffffff;
+  width: 80%;
+  margin: 20px auto;
+  border-collapse: collapse;
+  background-color: #253c3c;
+  color: #ffffff;
 }
 
 .tasks thead th {
-    font-size: large;
-    text-wrap: wrap;
-    height: 60px;
+  font-size: 20px;
+  text-wrap: wrap;
+  height: 60px;
+  cursor: pointer;
 }
 
-.tasks th, .tasks td {
-    padding: 10px;
-    border: 1px solid #ffffff;
-    text-align: left;
+.tasks thead th:hover {
+  background-color: #147b73;
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+.tasks th,
+.tasks td {
+  padding: 10px;
+  border: 1px solid #ffffff;
+  text-align: left;
 }
 
 .tasks th {
-    background-color: #253c3c;
-    color: #ffffff;
+  background-color: #253c3c;
+  color: #ffffff;
 }
 
-.tasks tr:nth-child(odd) {
-    background-color: #ffffff;
-    color: #253c3c;
+/* .tasks tr:nth-child(odd) {
+  background-color: #ffffff;
+  color: #253c3c;
+} */
+
+.sort-arrow-down {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 10px solid #fff; /* Change color as needed */
+  margin-left: 10px;
+  vertical-align: middle;
 }

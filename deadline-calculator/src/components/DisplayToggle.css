@@ -12,9 +12,10 @@
   padding-left: 20px;
 }
 
-.middle {
+.control-panel {
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 
 .radio-toggle {

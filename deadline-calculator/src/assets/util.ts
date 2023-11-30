@@ -26,3 +26,23 @@ export function getOwnDay(date: Date) {
 export function addDays(date: Date, days: number): Date {
   return new Date(date.setDate(date.getDate() + days));
 }
+
+// function skipWeekends(date) {
+// 	const day = getOwnDay(date);
+// 	if(day > 5) return addDays(date, 7 - day);
+// }
+
+/**
+ * TODO: TEST THIS
+ * @returns {number} Return what is today's remaining workhours
+ */
+export function getTodaysRemaining(): number {
+  if (new Date().getHours() < 9) {
+    return 8;
+  } else if (new Date().getHours() > 17) {
+    // GIVE A DAY TO THE STARTDATE
+    return 8;
+  } else {
+    return 17 - new Date().getHours();
+  }
+}

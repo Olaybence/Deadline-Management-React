@@ -1,5 +1,5 @@
 import { Schedule, Task } from "../assets/models";
-import { addDays, getOwnDay, workhours } from "../assets/util";
+import { addDays, getOwnDay, getTodaysRemaining, workhours } from "../assets/util";
 
 // TODO: TEST THIS
 /**
@@ -35,41 +35,7 @@ export function orderTasksByDeadline(tasks : Task[]) {
 
   });
 
-  // console.log("orderedTasks", orderedTasks);
-  return orderedTasks;
-}
-
-/**
- * Order the tasks by deadline
- * Compare them one-by-one and place them in the right place
- * This implements the quicksort algorithm with O(N*logN) time and n space
- */
-export function orderTasksByID(tasks: Task[]) {
-  // console.log("orderTasksByDeadline tasks",tasks)
-  if(tasks.length === 0) return [];
-
-  let orderedTasks = [tasks[0]];
-
-  tasks.slice(1).forEach((task) => {
-    let placed = false;
-    let i = 0;
-    while (!placed && i < orderedTasks.length) {
-      const compTask = orderedTasks[i];
-      if (task.id < compTask.id) {
-        orderedTasks = orderedTasks
-          .slice(0, i)
-          .concat([task], orderedTasks.slice(i));
-        placed = true;
-      }
-      i++;
-    }
-    if (!placed) {
-      orderedTasks.push(task);
-    }
-
-  });
-
-  // console.log("orderedTasks", orderedTasks);
+  // console.log("orderedTasks", orderedTas2ks);
   return orderedTasks;
 }
 
@@ -109,7 +75,7 @@ function calculateScheduleLazy(tasks: Task[]) {
     if (remainingTime + timeArray.length * workhours < task.turnaroundTime) {
       // NOW: Ignore if not possible in line
       // TODO: Use priority
-      // console.log("WARNING: Task ignored with ID:", task.id);
+      console.log("WARNING: Task ignored with ID:", task.id);
       schedule = evaluatePriority(schedule, task);
     } else {
       // If possible (no conflict), add to task to the schedule and calculate its data
@@ -157,7 +123,6 @@ function calculateItem(task: Task, remainingTime: number, progressDay: Date): Sc
     timeSpent: timeSpent,
     deadline: task.deadline,
   };
-  console.log("calculateItem res",res);
   return res;
 }
 
@@ -172,26 +137,6 @@ function calculateItem(task: Task, remainingTime: number, progressDay: Date): Sc
  */
 function evaluatePriority(schedule: Schedule[], task: Task) {
   return schedule;
-}
-
-// function skipWeekends(date) {
-// 	const day = getOwnDay(date);
-// 	if(day > 5) return addDays(date, 7 - day);
-// }
-
-/**
- * TODO: TEST THIS
- * @returns {number} Return what is today's remaining workhours
- */
-function getTodaysRemaining(): number {
-  if (new Date().getHours() < 9) {
-    return 8;
-  } else if (new Date().getHours() > 17) {
-    // GIVE A DAY TO THE STARTDATE
-    return 8;
-  } else {
-    return 17 - new Date().getHours();
-  }
 }
 
 /**
