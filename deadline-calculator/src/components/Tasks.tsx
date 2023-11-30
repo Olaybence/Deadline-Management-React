@@ -3,7 +3,8 @@ import "./Tasks.css";
 import { weekdaysMin } from "moment";
 import { priorityStrings } from "../assets/data";
 import { orderTasksByID } from "../algorithms/algorithms";
-import { Task, dateFormatter } from "../assets/util";
+import { dateFormatter } from "../assets/util";
+import { Task } from "../assets/models";
 
 export default function Tasks() {
   /**

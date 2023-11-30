@@ -1,4 +1,5 @@
-import { Task } from "./util";
+import { Task } from "./models";
+
 
 // This dataset includes a variety of problems.
 let i = 0;

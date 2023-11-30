@@ -3,7 +3,7 @@ import {
   calculateSchedule,
 } from "../algorithms/algorithms";
 import { initialTasks } from "../assets/data";
-import { Schedule, Task } from "../assets/util";
+import { Schedule, Task } from "../assets/models";
 
 // Actiontypes
 export const ADD_TASK = "ADD_TASK";
@@ -129,27 +129,27 @@ function loadData() {
     let res = JSON.parse(savedData);
     // console.log("res", res);
     res.tasks = res.tasks.map((taskRaw: any) => {
-      let task: Task = {
-        id: Number(taskRaw.id),
-        name: taskRaw.name,
-        priority: Number(taskRaw.priority),
-        deadline: new Date(taskRaw.deadline),
-        turnaroundTime: Number(taskRaw.turnaroundTime),
-      };
+      let task: Task = new Task(
+        taskRaw.id,
+        taskRaw.name,
+        taskRaw.priority,
+        taskRaw.deadline,
+        taskRaw.turnaroundTime
+      );
       return task;
     });
     res.schedule = res.schedule.map((scheduleRaw: any, idx: number) => {
-      let schedule: Schedule = {
-        taskId: Number(scheduleRaw.taskId),
-        taskName: scheduleRaw.taskName,
-        taskPriority: Number(scheduleRaw.taskPriority),
-        turnaroundTime: Number(scheduleRaw.turnaroundTime),
-        startDate: new Date(scheduleRaw.startDate),
-        endDate: new Date(scheduleRaw.endDate),
-        remainingTime: Number(scheduleRaw.remainingTime),
-        timeSpent: scheduleRaw.timeSpent.map((item: string) => Number(item)),
-        deadline: new Date(scheduleRaw.deadline),
-      };
+      let schedule: Schedule = new Schedule(
+        scheduleRaw.taskId,
+        scheduleRaw.taskName,
+        scheduleRaw.taskPriority,
+        scheduleRaw.turnaroundTime,
+        scheduleRaw.startDate,
+        scheduleRaw.endDate,
+        scheduleRaw.remainingTime,
+        scheduleRaw.timeSpent,
+        scheduleRaw.deadline
+      );
       return schedule;
     });
     return res;

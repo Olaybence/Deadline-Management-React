@@ -2,7 +2,8 @@ import { useSelector } from "react-redux";
 import "./ScheduleComponent.css";
 import { weekdaysMin } from "moment";
 import { priorityStrings } from "../assets/data";
-import { Schedule, dateFormatter } from "../assets/util";
+import { dateFormatter } from "../assets/util";
+import { Schedule } from "../assets/models";
 
 export default function ScheduleComponent() {
   /**

@@ -1,6 +1,5 @@
-// TODO: Idea - Create an object for date manipulations
-
-import { Schedule, Task, addDays, getOwnDay, workhours } from "../assets/util";
+import { Schedule, Task } from "../assets/models";
+import { addDays, getOwnDay, workhours } from "../assets/util";
 
 // TODO: TEST THIS
 /**
@@ -9,7 +8,6 @@ import { Schedule, Task, addDays, getOwnDay, workhours } from "../assets/util";
  * This implements the quicksort algorithm with O(N*logN) time and n space
  */
 export function orderTasksByDeadline(tasks : Task[]) {
-  // console.log("orderTasksByDeadline tasks",tasks)
   if(tasks.length === 0) return [];
 
   let orderedTasks: Task[] = [tasks[0]];
@@ -91,15 +89,6 @@ export function calculateSchedule(tasks: Task[]) {
 }
 
 /**
- * Schedule: {
- *        
- *        
- *        
- *        
- *        
- *        
- *        
- *    }
  * @param {Task[]} tasks
  * @returns {Schedule[]} optimalized ordered schedule array
  */
