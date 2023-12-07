@@ -30,7 +30,6 @@ export default function ScheduleComponent() {
 
   function deleteTask(taskId: number, rowId: number) {
     const rows = document.querySelectorAll(".schedule tr");
-    console.log("rows",rows);
     rows[rowId].classList.add("collapsed");
     // setTimeout(() => {
     //   dispatch({ type: REMOVE_TASK, id: taskId });

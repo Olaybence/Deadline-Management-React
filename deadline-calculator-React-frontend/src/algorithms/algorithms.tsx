@@ -1,5 +1,10 @@
 import { Schedule, Task } from "../assets/models";
-import { addDays, getOwnDay, getTodaysRemaining, workhours } from "../assets/util";
+import {
+  addDays,
+  getOwnDay,
+  getTodaysRemaining,
+  workhours,
+} from "../assets/util";
 
 // TODO: TEST THIS
 /**
@@ -7,8 +12,8 @@ import { addDays, getOwnDay, getTodaysRemaining, workhours } from "../assets/uti
  * Compare them one-by-one and place them in the right place
  * This implements the quicksort algorithm with O(N*logN) time and n space
  */
-export function orderTasksByDeadline(tasks : Task[]) {
-  if(tasks.length === 0) return [];
+export function orderTasksByDeadline(tasks: Task[]) {
+  if (tasks.length === 0) return [];
 
   let orderedTasks: Task[] = [tasks[0]];
   tasks.slice(1).forEach((task) => {
@@ -32,7 +37,6 @@ export function orderTasksByDeadline(tasks : Task[]) {
     if (!placed) {
       orderedTasks.push(task);
     }
-
   });
 
   // console.log("orderedTasks", orderedTas2ks);
@@ -60,11 +64,11 @@ export function calculateSchedule(tasks: Task[]) {
  */
 function calculateScheduleLazy(tasks: Task[]) {
   let schedule: Schedule[] = [];
-  let progressDay = new Date().getHours() > 17 ? addDays(new Date(),1) : new Date();
+  let progressDay =
+    new Date().getHours() > 17 ? addDays(new Date(), 1) : new Date();
   let remainingTime = getTodaysRemaining();
   // console.log("calculateScheduleLazy", tasks);
   tasks.forEach((task: Task) => {
-
     // Calculate the hours needed per days
     const timeArray = calculateTimeArray(
       progressDay,
@@ -95,8 +99,6 @@ function calculateScheduleLazy(tasks: Task[]) {
   return schedule;
 }
 
-
-
 /**
  * TODO: TEST THIS:
  * - nothing is undefined
@@ -107,10 +109,18 @@ function calculateScheduleLazy(tasks: Task[]) {
  * @param {Date} progressDay
  * @returns {Schedule}
  */
-function calculateItem(task: Task, remainingTime: number, progressDay: Date): Schedule {
+function calculateItem(
+  task: Task,
+  remainingTime: number,
+  progressDay: Date
+): Schedule {
   // console.log("calculateItem task, remainingTime, progressDay", task, remainingTime, progressDay);
   // Time needed each day
-  let timeSpent = calculateTimeArray(progressDay,task.turnaroundTime,remainingTime);
+  let timeSpent = calculateTimeArray(
+    progressDay,
+    task.turnaroundTime,
+    remainingTime
+  );
 
   const res = {
     taskId: task.id,
@@ -119,7 +129,10 @@ function calculateItem(task: Task, remainingTime: number, progressDay: Date): Sc
     turnaroundTime: task.turnaroundTime,
     startDate: progressDay,
     endDate: addDays(progressDay, timeSpent.length - 1),
-    remainingTime: timeSpent.length > 1 ? workhours - timeSpent[timeSpent.length-1] : remainingTime - timeSpent[timeSpent.length-1],
+    remainingTime:
+      timeSpent.length > 1
+        ? workhours - timeSpent[timeSpent.length - 1]
+        : remainingTime - timeSpent[timeSpent.length - 1],
     timeSpent: timeSpent,
     deadline: task.deadline,
   };
@@ -183,21 +196,24 @@ function evaluatePriority(schedule: Schedule[], task: Task) {
 // }
 
 /**
- * 
- * @param {Date} startDate 
- * @param {number} turnaroundTime 
- * @param {number} remainingStartdayTime 
+ *
+ * @param {Date} startDate
+ * @param {number} turnaroundTime
+ * @param {number} remainingStartdayTime
  * @returns {number[]}
  */
-function calculateTimeArray(startDate: Date, turnaroundTime: number, remainingStartdayTime: number) {
-  
+function  calculateTimeArray(
+  startDate: Date,
+  turnaroundTime: number,
+  remainingStartdayTime: number
+) {
   // Single-day task
   if (turnaroundTime <= remainingStartdayTime) return [turnaroundTime];
 
   // Multi-day task (at least 2 days)
   let timeArray = [];
-  if(remainingStartdayTime !== 0) timeArray.push(remainingStartdayTime);
-  
+  if (remainingStartdayTime !== 0) timeArray.push(remainingStartdayTime);
+
   let remainingTime = turnaroundTime - remainingStartdayTime;
 
   const furtherDaysNeeded = Math.floor(remainingTime / workhours);

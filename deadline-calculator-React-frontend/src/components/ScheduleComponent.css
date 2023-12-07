@@ -22,7 +22,8 @@
   cursor: pointer;
 }
 
-.schedule thead .clickable:hover {
+.schedule thead .clickable:hover,
+.schedule thead .clickable:focus {
   background-color: #147b73;
   text-decoration: underline;
   font-weight: 600;
@@ -41,14 +42,15 @@
 }
 
 .schedule tr {
-  transition: opacity 0.5s ease-out;
-  transition: height 0.5s ease-out;
+  transition: all 0.5s ease-out;
+  /* transition: opacity 0.5s ease-out, height 0.5s ease-out; */
   overflow: hidden;
 }
 
-.schedule > tr.collapsed {
+.schedule tr.collapsed {
   opacity: 0 !important;
-  max-height: 0 !important;
+  height: 0 !important;
+  overflow: hidden;
 }
 
 /* .schedule tr:nth-child(odd) {

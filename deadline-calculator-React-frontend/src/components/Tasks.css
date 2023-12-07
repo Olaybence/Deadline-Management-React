@@ -14,7 +14,8 @@
   cursor: pointer;
 }
 
-.tasks thead th:hover {
+.tasks thead th:hover,
+.tasks thead th:focus {
   background-color: #147b73;
   text-decoration: underline;
   font-weight: 600;

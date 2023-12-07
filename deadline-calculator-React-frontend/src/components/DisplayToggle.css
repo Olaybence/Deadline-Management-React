@@ -8,6 +8,11 @@
   cursor: pointer;
 }
 
+.save-button:hover,
+.save-button:focus {
+  background-color: #319890;
+}
+
 .padding {
   padding-left: 20px;
 }
@@ -38,7 +43,8 @@
   text-align: center;
 }
 
-.radio-toggle label:hover {
+.radio-toggle label:hover,
+.radio-toggle label:focus {
   background-color: #BBDDF3;
 }
 
