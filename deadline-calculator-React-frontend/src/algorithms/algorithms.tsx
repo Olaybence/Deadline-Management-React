@@ -84,6 +84,7 @@ function calculateItem(
 ): Schedule {
   const startDate = new Date(progressDay);
   console.log("calculateItem startDate", startDate);
+  console.log("calculateItem remainingTime", remainingTime);
   // Time needed each day
   let timeSpent = calculateTimeArray(
     progressDay,
@@ -91,19 +92,26 @@ function calculateItem(
     remainingTime
   );
 
-  const nextRemainingTime =
-    timeSpent.length > 1
-      ? OwnDate.workhours - timeSpent[timeSpent.length - 1]
-      : remainingTime - timeSpent[timeSpent.length - 1];
+  let nextRemainingTime;
+  if (timeSpent.length > 1) {
+    nextRemainingTime = OwnDate.workhours - timeSpent[timeSpent.length - 1];
+  } else if(remainingTime !== 0) {
+    nextRemainingTime = remainingTime - timeSpent[timeSpent.length - 1];
+  } else { // Handle edgecase where in one day there is no remainingTime.
+    nextRemainingTime = OwnDate.workhours - timeSpent[timeSpent.length - 1];
+  }
 
-  console.log("timeSpent.length - 1",timeSpent.length - 1);
+  console.log("timeSpent.length - 1", timeSpent.length - 1);
   const endDate = OwnDate.getDayAtHour(
     OwnDate.addDays(startDate, timeSpent.length - 1),
     OwnDate.dayEndHour - nextRemainingTime
-    );
-  console.log("OwnDate.addDays(startDate, timeSpent.length - 1)", OwnDate.addDays(startDate, timeSpent.length - 1));
+  );
+  console.log(
+    "OwnDate.addDays(startDate, timeSpent.length - 1)",
+    OwnDate.addDays(startDate, timeSpent.length - 1)
+  );
   console.log("endDate", endDate);
-    
+
   return new Schedule(
     task.id,
     task.name,
@@ -142,7 +150,7 @@ function calculateTimeArray(
   turnaroundTime: number,
   remainingStartdayTime: number
 ) {
-  console.log("calculateTimeArray startDate",startDate);
+  console.log("calculateTimeArray startDate", startDate);
   // Single-day task
   if (turnaroundTime <= remainingStartdayTime) return [turnaroundTime];
 
