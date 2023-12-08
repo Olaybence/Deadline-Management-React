@@ -24,7 +24,7 @@ export default function ScheduleComponent() {
   console.log("schedule", schedule);
 
   const width = (w: string) => ({ width: w + "%" });
-  const widths = ["2", "21", "9", "9", "12", "12", "16", "10", "8", "1"];
+  const widths = ["4", "19", "9", "9", "12", "12", "16", "10", "8", "1"];
   if (widths.length < 9)
     console.warn("Not enought width for CSS in SchedzleComponent!");
 
@@ -139,7 +139,7 @@ export default function ScheduleComponent() {
                 ))}
               <span>{item.timeSpent[item.timeSpent.length - 1]}</span>
             </td>
-            <td>{OwnDate.dateFormatter(item.deadline)}</td>
+            <td>{OwnDate.dateFormatter(item.deadline, OwnDate.dateFormat)} ({weekdaysMin(new Date(item.deadline).getDay())})</td>
             {item.endDate < item.deadline ? (
               <td>On Time</td>
             ) : (

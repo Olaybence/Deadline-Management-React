@@ -4,9 +4,10 @@ export class OwnDate {
   static dayStartHour = 9;
   static dayEndHour = 17;
   static workhours = 8;
-  static dateFormat = "YYYY-MM-DD HH:mm";
-  static dateFormatter = (date: Date) =>
-    Moment(date).format(OwnDate.dateFormat);
+  static dateFormatWithHour = "YYYY-MM-DD HH:mm";
+  static dateFormat = "YYYY-MM-DD";
+  static dateFormatter = (date: Date, format: string = OwnDate.dateFormatWithHour) =>
+    Moment(date).format(format);
 
   /**
    * convert the default getDay(): Su-0 M-1 Tu-2 We-3 Th-4 Fr-5 Sa-6
