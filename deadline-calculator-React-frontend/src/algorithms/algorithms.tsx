@@ -96,16 +96,21 @@ function calculateItem(
       ? OwnDate.workhours - timeSpent[timeSpent.length - 1]
       : remainingTime - timeSpent[timeSpent.length - 1];
 
+  console.log("timeSpent.length - 1",timeSpent.length - 1);
+  const endDate = OwnDate.getDayAtHour(
+    OwnDate.addDays(startDate, timeSpent.length - 1),
+    OwnDate.dayEndHour - nextRemainingTime
+    );
+  console.log("OwnDate.addDays(startDate, timeSpent.length - 1)", OwnDate.addDays(startDate, timeSpent.length - 1));
+  console.log("endDate", endDate);
+    
   return new Schedule(
     task.id,
     task.name,
     task.priority,
     task.turnaroundTime,
     startDate,
-    OwnDate.getDayAtHour(
-      OwnDate.addDays(progressDay, timeSpent.length - 1),
-      OwnDate.dayEndHour - nextRemainingTime
-    ),
+    endDate,
     nextRemainingTime,
     timeSpent,
     task.deadline

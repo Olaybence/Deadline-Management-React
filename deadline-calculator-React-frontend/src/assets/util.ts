@@ -71,9 +71,9 @@ export class OwnDate {
    * Move to the next day
    * @return {Date} next day at hour o'clock
    *  */ 
-  static getDayAtHour(date: Date, hour: number) {
-    date.setHours(hour, 0, 0, 0);
-    return date;
+  static getDayAtHour(date: Date, hour: number): Date {
+    // TODO: Understand how React handles parameters. What is by reference and what is by value?
+    return new Date(new Date(date).setHours(hour, 0, 0, 0));
   }
 
   /**
