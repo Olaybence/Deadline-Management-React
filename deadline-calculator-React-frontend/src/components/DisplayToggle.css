@@ -1,0 +1,57 @@
+.save-button {
+  padding: 0.5rem 1rem;
+  font-size: 1.3rem;
+  border-radius: 4px;
+  border: none;
+  background-color: #147b73;
+  color: #d9e2f1;
+  cursor: pointer;
+}
+
+.save-button:hover,
+.save-button:focus {
+  background-color: #319890;
+}
+
+.padding {
+  padding-left: 20px;
+}
+
+.control-panel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.radio-toggle {
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 3px 8px 0 rgba(0, 0, 0, 0.19);
+  height: 40px;
+  width: 50%;
+  display: flex;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.radio-toggle label {
+  width: 50%;
+  display: inline-block;
+  color: black;
+  background-color: #FFFFFF;
+  margin-left: -30px;
+  padding: 10px 20px;
+  font-size: 16px;
+  text-align: center;
+}
+
+.radio-toggle label:hover,
+.radio-toggle label:focus {
+  background-color: #BBDDF3;
+}
+
+.radio-toggle input[type="radio"]:checked+label {
+  background-color: #3498DB;
+}
+
+input[type="radio"] {
+  visibility: hidden;
+}
