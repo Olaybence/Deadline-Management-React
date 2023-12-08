@@ -1,3 +1,15 @@
+export class State {
+  tasks: Task[];
+  nextId: number;
+  schedule: Schedule[];
+
+  constructor(tasks: Task[], nextId: number, schedule: Schedule[]) {
+    this.tasks = tasks;
+    this.nextId = nextId;
+    this.schedule = schedule;
+  }
+}
+
 export class Task {
   id: number; // Unique identifier
   name: string;

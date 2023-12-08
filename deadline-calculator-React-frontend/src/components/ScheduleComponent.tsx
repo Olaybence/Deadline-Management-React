@@ -4,10 +4,10 @@ import { useDispatch, useSelector } from "react-redux";
 import "./ScheduleComponent.css";
 import { weekdaysMin } from "moment";
 import { priorityStrings } from "../assets/data";
-import { dateFormatter } from "../assets/util";
 import { Schedule } from "../assets/models";
 import { useState } from "react";
 import { REMOVE_TASK } from "../reducers/taskReducer";
+import { OwnDate } from "../assets/util";
 
 export default function ScheduleComponent() {
   const dispatch = useDispatch();
@@ -31,9 +31,9 @@ export default function ScheduleComponent() {
   function deleteTask(taskId: number, rowId: number) {
     const rows = document.querySelectorAll(".schedule tr");
     rows[rowId].classList.add("collapsed");
-    // setTimeout(() => {
-    //   dispatch({ type: REMOVE_TASK, id: taskId });
-    // }, 500);
+    setTimeout(() => {
+      dispatch({ type: REMOVE_TASK, id: taskId });
+    }, 500);
   }
 
   return (
@@ -123,11 +123,11 @@ export default function ScheduleComponent() {
             <td>{item.turnaroundTime}</td>
             <td>{priorityStrings[item.taskPriority]}</td>
             <td>
-              {dateFormatter(item.startDate)} (
+              {OwnDate.dateFormatter(item.startDate)} (
               {weekdaysMin(item.startDate.getDay())})
             </td>
             <td>
-              {dateFormatter(item.endDate)} (
+              {OwnDate.dateFormatter(item.endDate)} (
               {weekdaysMin(new Date(item.endDate).getDay())})
             </td>
             {/* <td>{item.remainingTime}</td> */}
@@ -139,7 +139,7 @@ export default function ScheduleComponent() {
                 ))}
               <span>{item.timeSpent[item.timeSpent.length - 1]}</span>
             </td>
-            <td>{dateFormatter(item.deadline)}</td>
+            <td>{OwnDate.dateFormatter(item.deadline)}</td>
             {item.endDate < item.deadline ? (
               <td>On Time</td>
             ) : (

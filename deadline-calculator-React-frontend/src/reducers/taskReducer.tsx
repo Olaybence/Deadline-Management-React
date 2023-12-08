@@ -1,9 +1,8 @@
 import {
-  orderTasksByDeadline,
   calculateSchedule,
 } from "../algorithms/algorithms";
 import { initialTasks } from "../assets/data";
-import { Schedule, Task } from "../assets/models";
+import { Schedule, State, Task } from "../assets/models";
 
 // Actiontypes
 export const ADD_TASK = "ADD_TASK";
@@ -17,23 +16,23 @@ const initialTaskState = () => {
   const loaded = loadData();
   console.log("loaded data", loaded);
   if (loaded) {
-    if (!loaded.nextId) calculateNextId(loaded.tasks);
     return loaded;
   }
 
-  const initTasksOrdered = orderTasksByDeadline(initialTasks);
+  const initTasksOrdered = Task.orderTasksByTag(initialTasks,Task.TAG_DEADLINE);
   // Default values
-  const state = {
+  const state = new State(
     /**
      * TODO: Put this into a backend (Bence: I would prefer a Java Spring + REST API)
      * List of tasks inordered.
      * It is only for storing them
      */
-    tasks: initTasksOrdered,
-    nextId: calculateNextId(initialTasks),
-    schedule: calculateSchedule(initTasksOrdered),
-    // schedule: initialSchedule,
-  };
+    initTasksOrdered,
+    0,
+    calculateSchedule(initTasksOrdered),
+    // [],
+  );
+  console.log("state", state);
   return state;
 };
 
@@ -58,36 +57,44 @@ const initialTaskState = () => {
 //   }
 // });
 
-const taskReducer = (state = initialTaskState(), action: any) => {
-  // console.log("taskReducer state", state, " action", action);
-  let res = {};
+const taskReducer = (state: State = initialTaskState(), action: any): State => {
+  console.log("taskReducer state", state, " action", action);
   let newTasks = state.tasks;
+  let newState;
   switch (action.type) {
     case ADD_TASK:
-      newTasks.push({ ...action.task, id: state.nextId });
-      newTasks = orderTasksByDeadline(newTasks);
-      res = {
-        ...state,
-        tasks: newTasks,
-        nextId: state.nextId + 1,
-        schedule: calculateSchedule(newTasks),
-      };
-      return res;
-    case REMOVE_TASK:
-      newTasks = orderTasksByDeadline(
-        newTasks.filter((item: Task) => item.id !== action.id)
+      const newTask = new Task(
+        action.task.id,
+        action.task.name,
+        action.task.priority,
+        action.task.deadline,
+        action.task.turnaroundTime
       );
-      return {
-        ...state,
-        tasks: newTasks,
-        schedule: calculateSchedule(newTasks),
-      };
+      newTasks.push(newTask);
+      console.log()
+      newTasks = Task.orderTasksByTag(newTasks,Task.TAG_DEADLINE);
+
+      newState = new State(newTasks,
+        state.nextId + 1,
+        calculateSchedule(newTasks),
+      );
+      console.log("newState", newState);
+      return newState;
+    case REMOVE_TASK:
+      newTasks = Task.orderTasksByTag(
+        newTasks.filter((item: Task) => item.id !== action.id),
+        Task.TAG_DEADLINE
+      );
+      
+      newState = new State(newTasks, state.nextId, calculateSchedule(newTasks));
+      console.log("newState", newState);
+      return newState;
     case FETCH_DATA:
-      res = {
-        ...state,
-        tasks: orderTasksByDeadline(newTasks.concat(action.tasks)),
-      };
-      return res;
+      const fetchedState = fetchData();
+      
+      newState = fetchedState ? fetchedState : new State([],0,[]);
+      console.log("newState", newState);
+      return newState;
     case SAVE_DATA:
       saveData(state);
       return state;
@@ -103,11 +110,11 @@ const taskReducer = (state = initialTaskState(), action: any) => {
  * TODO: TEST THIS
  * - check if it saves or not.
  *  */
-function saveData(data: any) {
+function saveData(state: State) {
   // Save data to a cookie
-  // console.log("save data: number of tasks:", data.tasks.length);
-  if (data) {
-    localStorage.setItem("savedTaskState", JSON.stringify(data));
+  console.log("save data:", state);
+  if (state) {
+    localStorage.setItem("savedTaskState", JSON.stringify(state));
   } else localStorage.removeItem("savedTaskState");
 }
 
@@ -138,22 +145,14 @@ function loadData() {
       );
       return task;
     });
-    res.schedule = res.schedule.map((scheduleRaw: any, idx: number) => {
-      let schedule: Schedule = new Schedule(
-        scheduleRaw.taskId,
-        scheduleRaw.taskName,
-        scheduleRaw.taskPriority,
-        scheduleRaw.turnaroundTime,
-        scheduleRaw.startDate,
-        scheduleRaw.endDate,
-        scheduleRaw.remainingTime,
-        scheduleRaw.timeSpent,
-        scheduleRaw.deadline
-      );
-      return schedule;
-    });
-    return res;
+    res.nextId = calculateNextId(res.tasks);
+    res.schedule = calculateSchedule(res.tasks);
+    return new State(res.tasks, res?.nextId, res.schedule);
   } else return null;
+}
+
+function fetchData() {
+  return loadData();
 }
 
 /**

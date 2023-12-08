@@ -2,9 +2,9 @@ import { useSelector } from "react-redux";
 import "./Tasks.css";
 import { weekdaysMin } from "moment";
 import { priorityStrings } from "../assets/data";
-import { dateFormatter } from "../assets/util";
 import { Task } from "../assets/models";
 import { useState } from "react";
+import { OwnDate } from "../assets/util";
 
 export default function Tasks() {
   const [tag, setTag] = useState(Task.TAG_ID);
@@ -51,7 +51,7 @@ export default function Tasks() {
             <td>{item.turnaroundTime}</td>
             <td>{priorityStrings[item.priority]}</td>
             <td>
-              {dateFormatter(item.deadline)} (
+              {OwnDate.dateFormatter(item.deadline)} (
               {weekdaysMin(new Date(item.deadline).getDay())})
             </td>
           </tr>

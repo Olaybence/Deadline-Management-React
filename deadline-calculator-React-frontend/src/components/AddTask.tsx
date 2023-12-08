@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 export default function AddTask() {
   const dispatch = useDispatch();
   const nextId = useSelector((state: any) => state.nextId);
-
+  console.log("nextId",nextId)
 
   function handleSubmit(event: any) {
     // Stop the submit to get to the not yet existing server.
@@ -19,7 +19,7 @@ export default function AddTask() {
       ...taskObj,
       turnaroundTime: Number(taskObj.turnaroundTime),
       priority: Number(taskObj.priority),
-      id: nextId
+      id: Number(nextId)
     }
 
     // Store the task, and put it in our schedule.
