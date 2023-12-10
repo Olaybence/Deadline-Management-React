@@ -2,7 +2,7 @@ import {
   calculateSchedule,
 } from "../algorithms/algorithms";
 import { initialTasks } from "../assets/data";
-import { Schedule, State, Task } from "../assets/models";
+import { State, Task } from "../assets/models";
 
 // Actiontypes
 export const ADD_TASK = "ADD_TASK";
@@ -13,11 +13,11 @@ export const SAVE_DATA = "SAVE_DATA";
 
 const initialTaskState = () => {
   // Try to load in from cache
-  const loaded = loadData();
-  console.log("loaded data", loaded);
-  if (loaded) {
-    return loaded;
-  }
+  // const loaded = loadData();
+  // console.log("loaded data", loaded);
+  // if (loaded) {
+  //   return loaded;
+  // }
 
   const initTasksOrdered = Task.orderTasksByTag(initialTasks,Task.TAG_DEADLINE);
   // Default values
