@@ -54,16 +54,18 @@ export class OwnDate {
   }
 
   static getNextWorkday(time: Date): Date {
-    if(time.getHours() > OwnDate.dayEndHour) {
-      time = OwnDate.addDays(OwnDate.getDayAtHour(time,OwnDate.dayStartHour),1);
+    let newTime = new Date(time);
+    if(newTime.getHours() >= OwnDate.dayEndHour) {
+      console.log("Get to the next day as this day is over.");
+      newTime = OwnDate.addDays(OwnDate.getDayAtHour(newTime,OwnDate.dayStartHour),1);
     }
-    switch (OwnDate.dayIndex(time)) {
+    switch (OwnDate.dayIndex(newTime)) {
       case 6:
-        return OwnDate.addDays(time, 2);
+        return OwnDate.addDays(newTime, 2);
       case 7:
-        return OwnDate.addDays(time, 1);
+        return OwnDate.addDays(newTime, 1);
       default:
-        return time;
+        return newTime;
     }
   }
 

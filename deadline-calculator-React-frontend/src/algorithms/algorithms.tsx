@@ -22,16 +22,17 @@ export function calculateSchedule(tasks: Task[]) {
  */
 function calculateScheduleLazy(tasks: Task[]) {
   let schedule: Schedule[] = [];
-  let progressDay = OwnDate.getNextWorkday(new Date());
-  console.log("Start time", progressDay);
-  console.log("Today's remaining time:", OwnDate.getTodaysRemaining());
+  let progressTime = OwnDate.getNextWorkday(new Date());
   let remainingTime = OwnDate.getTodaysRemaining();
+  
+  console.log("Start time", progressTime);
+  console.log("Today's remaining time:", remainingTime);
   tasks.forEach((task: Task, i: number) => {
     console.log("---------------------------------------");
     console.log("Task " + i + ":", task);
     // Calculate the hours needed per days
     const timeArray = calculateTimeArray(
-      progressDay,
+      progressTime,
       task.turnaroundTime,
       remainingTime
     );
@@ -47,7 +48,7 @@ function calculateScheduleLazy(tasks: Task[]) {
     //   schedule = evaluatePriority(schedule, task);
     // } else {
     // If possible (no conflict), add to task to the schedule and calculate its data
-    const nextSchedule = calculateItem(task, remainingTime, progressDay);
+    const nextSchedule = calculateItem(task, remainingTime, progressTime);
     // console.log("calculateItem - nextSchedule", nextSchedule);
     schedule.push(nextSchedule);
 
@@ -56,11 +57,11 @@ function calculateScheduleLazy(tasks: Task[]) {
     console.log("remainingTime", remainingTime);
     console.log("nextSchedule.startDate", nextSchedule.startDate);
     console.log("nextSchedule.endDate", nextSchedule.endDate);
-    if (remainingTime > 0) progressDay = nextSchedule.endDate;
-    else progressDay = OwnDate.getNextWorkday(nextSchedule.endDate);
-    console.log("progressDay", progressDay);
+    if (remainingTime > 0) progressTime = nextSchedule.endDate;
+    else progressTime = OwnDate.getNextWorkday(nextSchedule.endDate);
+    console.log("progressTime", progressTime);
     // console.log("remainingTime", remainingTime);
-    // console.log("progressDay", progressDay);
+    // console.log("progressTime", progressTime);
     // }
   });
   // console.log("calculateScheduleLazy", schedule);
@@ -74,20 +75,20 @@ function calculateScheduleLazy(tasks: Task[]) {
  *
  * @param {Task} task
  * @param {number} remainingTime
- * @param {Date} progressDay
+ * @param {Date} progressTime
  * @returns {Schedule}
  */
 function calculateItem(
   task: Task,
   remainingTime: number,
-  progressDay: Date
+  progressTime: Date
 ): Schedule {
-  const startDate = new Date(progressDay);
+  const startDate = new Date(progressTime);
   console.log("calculateItem startDate", startDate);
   console.log("calculateItem remainingTime", remainingTime);
   // Time needed each day
   let timeSpent = calculateTimeArray(
-    progressDay,
+    progressTime,
     task.turnaroundTime,
     remainingTime
   );
@@ -95,9 +96,10 @@ function calculateItem(
   let nextRemainingTime;
   if (timeSpent.length > 1) {
     nextRemainingTime = OwnDate.workhours - timeSpent[timeSpent.length - 1];
-  } else if(remainingTime !== 0) {
+  } else if (remainingTime !== 0) {
     nextRemainingTime = remainingTime - timeSpent[timeSpent.length - 1];
-  } else { // Handle edgecase where in one day there is no remainingTime.
+  } else {
+    // Handle edgecase where in one day there is no remainingTime.
     nextRemainingTime = OwnDate.workhours - timeSpent[timeSpent.length - 1];
   }
 
@@ -152,28 +154,53 @@ function calculateTimeArray(
 ) {
   console.log("calculateTimeArray startDate", startDate);
   // Single-day task
-  if (turnaroundTime <= remainingStartdayTime) return [turnaroundTime];
+  if (turnaroundTime <= remainingStartdayTime) {
+    console.log(
+      "turnaroundTime is smaller than the remaining at the given day."
+    );
+    return [turnaroundTime];
+  }
 
   // Multi-day task (at least 2 days)
   let timeArray = [];
-  if (remainingStartdayTime !== 0) timeArray.push(remainingStartdayTime);
-
-  let remainingTime = turnaroundTime - remainingStartdayTime;
+  let remainingTime = turnaroundTime;
+  console.log("Multiday task, turnaroundTime: ", remainingTime);
+  if (remainingStartdayTime !== 0) {
+    timeArray.push(remainingStartdayTime);
+    remainingTime -= remainingStartdayTime;
+    console.log(
+      "Take the remaining of the given day. Turnaround time left:",
+      remainingTime
+    );
+  }
 
   const furtherDaysNeeded = Math.floor(remainingTime / OwnDate.workhours);
   const lastDayWorkHours = remainingTime % OwnDate.workhours;
   const startDay = OwnDate.getDay(startDate);
-
+  console.log(
+    "Multiday task, startDay:",
+    startDay,
+    "| furtherDaysNeeded: ",
+    furtherDaysNeeded,
+    "| lastDayWorkHours:",
+    lastDayWorkHours
+  );
   // If can be finished in the current week
   if (startDay + furtherDaysNeeded + (lastDayWorkHours > 0 ? 1 : 0) <= 5) {
-    if (furtherDaysNeeded > 0)
+    if (furtherDaysNeeded > 0) {
+      console.log("Add full day time of ", furtherDaysNeeded, " days");
       timeArray = timeArray.concat(
         Array(furtherDaysNeeded).fill(OwnDate.workhours)
       );
-    if (lastDayWorkHours > 0) timeArray.push(lastDayWorkHours);
+    }
+    if (lastDayWorkHours > 0) {
+      console.log("Left some time, add it for the last day:", lastDayWorkHours);
+      timeArray.push(lastDayWorkHours);
+    }
+
     return timeArray;
-    // Goes over weeks
   } else {
+    // Goes over weeks
     const furtherTimes = Array(furtherDaysNeeded)
       .fill(OwnDate.workhours)
       .concat(lastDayWorkHours > 0 ? [lastDayWorkHours] : []);
