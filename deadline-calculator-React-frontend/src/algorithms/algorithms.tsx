@@ -103,7 +103,7 @@ function calculateItem(
     nextRemainingTime = OwnDate.workhours - timeSpent[timeSpent.length - 1];
   }
 
-  console.log("timeSpent.length - 1", timeSpent.length - 1);
+  console.log("Whole days spent with the task:", timeSpent.length - 1);
   const endDate = OwnDate.getDayAtHour(
     OwnDate.addDays(startDate, timeSpent.length - 1),
     OwnDate.dayEndHour - nextRemainingTime

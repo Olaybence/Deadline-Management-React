@@ -1,2 +1,2 @@
-# Assuming you are in the root of your main project
-cp deadline-calculator-Node-backend/.gitignore .
+deadline-calculator-Node-backend/node_modules/*
+deadline-calculator-React-frontend/node_modules/*
