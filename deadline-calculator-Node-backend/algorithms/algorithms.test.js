@@ -40,7 +40,7 @@ describe("Graphic component test", () => {
     test("Check wether the turnaroundTime equals to the timeArray sum", () => {
       schedule.forEach((item) => {
         let sum = 0;
-        item.timeSpent.forEach((time: number) => (sum += time));
+        item.timeSpent.forEach((time) => (sum += time));
         if (sum !== item.turnaroundTime) {
           console.error(
             "TurnaroundTime:",
