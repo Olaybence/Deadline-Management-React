@@ -1,0 +1,2 @@
+# Assuming you are in the root of your main project
+cp deadline-calculator-Node-backend/.gitignore .
