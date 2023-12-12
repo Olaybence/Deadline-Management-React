@@ -1,4 +1,4 @@
-const { OwnDate } = require('../assets/util'); 
+const { OwnDate } = require('../models/util'); 
 /**
  * It calculates the order by simply order them by deadline,
  * and from now on continously work one-by-one.

@@ -1,6 +1,6 @@
-import { initialTasks } from "../assets/data";
+import { initialTasks } from "../models/data";
 import { calculateSchedule } from "./algorithms";
-import { OwnDate } from "../assets/util";
+import { OwnDate } from "../models/util";
 
 describe("Basic date manipulations", () => {
   test("addDays()", () => {
