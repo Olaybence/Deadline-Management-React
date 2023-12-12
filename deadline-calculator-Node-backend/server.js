@@ -4,6 +4,7 @@ const HttpError = require("./models/http-error");
 
 const taskRoutes = require("./routes/task-routes");
 const scheduleRoutes = require("./routes/schedule-routes");
+const usersRoutes = require("./routes/users-routes");
 
 const app = express();
 const port = 5000;
@@ -15,6 +16,7 @@ app.use(bodyParser.json());
 // Middleware(s)
 app.use("/api/tasks", taskRoutes);
 app.use("/api/schedule", scheduleRoutes);
+app.use("/api/users", usersRoutes);
 
 app.use((req, res, next) => {
   const error = new HttpError('Could not find this route', 404);
@@ -23,11 +25,14 @@ app.use((req, res, next) => {
 
 // Error handling middleware
 app.use((error, req, res, next) => {
+  console.log(error);
+  
   if(res.headerSent) {
     // Someone already sent a response
     return next(error);
   }
 
+  console.log("Error response sent:", error);
   res.status(error.code || 500); // Set or "Something went wrong on the server"
   res.json({message: error.message || "An unknown error occurred!"});
 });

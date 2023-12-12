@@ -10,6 +10,7 @@ router.get("/:taskId", taskControllers.getTaskById);
 
 router.post("/new", taskControllers.createTask);
 
+router.put("/:taskId", taskControllers.updateTaskAtId);
 router.patch("/:taskId", taskControllers.updateTaskAtId);
 
 router.delete("/:taskId", taskControllers.deleteTaskAtId);

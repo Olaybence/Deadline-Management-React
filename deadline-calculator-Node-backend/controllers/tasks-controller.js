@@ -1,3 +1,4 @@
+const { v4: uuidv4 } = require("uuid");
 const { initialTasks } = require("../models/data");
 const HttpError = require("../models/http-error");
 
@@ -9,7 +10,7 @@ const getTasks = (req, res, next) => {
 };
 
 const getTaskById = (req, res, next) => {
-  const taskId = parseInt(req.params.taskId);
+  const taskId = req.params.taskId;
   const task = tasks.find((t) => {
     return t.id === taskId;
   });
@@ -28,22 +29,40 @@ const getTaskById = (req, res, next) => {
 
 const createTask = (req, res, next) => {
   const newTask = req.body;
-  newTask.id = tasks.length + 1;
+  newTask.id = uuidv4();
   tasks.push(newTask); //unshift() for the first element
 
   res.status(201).json({ task: newTask });
 };
 
 const updateTaskAtId = (req, res, next) => {
-  const taskId = parseInt(req.params.taskId);
+  const taskId = req.params.taskId;
+
+  console.log("req.params", req.params);
+  console.log("taskId", taskId);
+
   const { name, deadline, turnaroundTime, priority } = req.body;
 
-  const updatedTask = { ...tasks.find((task) => task.id === taskId) };
+  const oldTask = tasks.find((task) => task.id === taskId);
 
-  updatedTask.name = name;
-  updatedTask.deadline = deadline;
-  updatedTask.turnaroundTime = turnaroundTime;
-  updatedTask.priority = priority;
+  if (!oldTask) {
+    return next(
+      new HttpError("There is no such task with the given ID: " + taskId, 422)
+    );
+  }
+
+  // If undefined, won't use it
+  const updatedTask = { ...oldTask };
+  updatedTask.name = name || updatedTask.name;
+  updatedTask.deadline = deadline || updatedTask.deadline;
+  updatedTask.turnaroundTime = turnaroundTime || updatedTask.turnaroundTime;
+  updatedTask.priority = priority || updatedTask.priority;
+
+  console.log(
+    "tasks.find((task) => task.id === taskId)",
+    tasks.find((task) => task.id === taskId)
+  );
+  console.log("updatedTask", updatedTask);
 
   tasks[taskId] = updatedTask;
 
@@ -51,10 +70,12 @@ const updateTaskAtId = (req, res, next) => {
 };
 
 const deleteTaskAtId = (req, res, next) => {
-  const taskId = parseInt(req.params.taskId);
+  const taskId = req.params.taskId;
+  console.log("taskId", taskId);
   removedTask = tasks.find((task) => task.id === taskId);
   tasks = tasks.filter((task) => task.id !== taskId);
 
+  console.log("removedTask", removedTask);
   res
     .status(200)
     .json({ message: "Task removed successfully", task: removedTask });
