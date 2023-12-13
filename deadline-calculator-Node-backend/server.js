@@ -1,4 +1,5 @@
 const express = require("express");
+
 const bodyParser = require("body-parser");
 const HttpError = require("./models/http-error");
 
@@ -19,25 +20,24 @@ app.use("/api/schedule", scheduleRoutes);
 app.use("/api/users", usersRoutes);
 
 app.use((req, res, next) => {
-  const error = new HttpError('Could not find this route', 404);
-  throw error;
+    return next(new HttpError("Could not find this route", 404));
 });
 
 // Error handling middleware
 app.use((error, req, res, next) => {
-  console.log(error);
-  
-  if(res.headerSent) {
-    // Someone already sent a response
-    return next(error);
-  }
+    console.log(error);
 
-  console.log("Error response sent:", error);
-  res.status(error.code || 500); // Set or "Something went wrong on the server"
-  res.json({message: error.message || "An unknown error occurred!"});
+    if (res.headerSent) {
+        // Someone already sent a response
+        return next(error);
+    }
+
+    console.log("Error response sent:", error);
+    res.status(error.code || 500); // Set or "Something went wrong on the server"
+    res.json({ message: error.message || "An unknown error occurred!" });
 });
 
 // Start the server
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+    console.log(`Server is running on port ${port}`);
 });
