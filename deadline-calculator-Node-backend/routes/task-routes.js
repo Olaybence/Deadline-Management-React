@@ -7,7 +7,8 @@ const taskControllers = require("../controllers/tasks-controller");
 // TASKS Endpoints
 router.get("/", taskControllers.getTasks);
 
-router.get("/:taskId", taskControllers.getTaskById);
+router.get("/task/:taskId", taskControllers.getTaskById);
+router.get("/user/:userId", taskControllers.getTasksByUserId);
 
 router.post("/new",
     [
@@ -17,9 +18,9 @@ router.post("/new",
         check("priority").isNumeric()
     ], taskControllers.createTask);
 
-router.put("/:taskId", taskControllers.updateTaskAtId);
-router.patch("/:taskId", taskControllers.updateTaskAtId);
+router.put("/:taskId", taskControllers.updateTask);
+router.patch("/:taskId", taskControllers.updateTask);
 
-router.delete("/:taskId", taskControllers.deleteTaskAtId);
+router.delete("/:taskId", taskControllers.deleteTask);
 
 module.exports = router;

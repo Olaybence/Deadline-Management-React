@@ -1,4 +1,6 @@
-const { OwnDate } = require('../models/util'); 
+const moment = require("moment");
+const { OwnDate } = require("../models/util");
+
 /**
  * It calculates the order by simply order them by deadline,
  * and from now on continously work one-by-one.
@@ -10,8 +12,56 @@ const { OwnDate } = require('../models/util');
  * @returns Returns an ordered list in which we need to solve the given tasks.
  */
 function calculateSchedule(tasks) {
-  // console.log("BENCE calculateItem - calculateSchedule");
-  return calculateScheduleLazy(tasks);
+  // Call the function and print the result
+  const taskOrder = calculateTaskOrder(tasks);
+
+  // const taskOrder = calculateScheduleLazy(tasks); // Own without moment library
+  console.log("Task Order:", taskOrder);
+  return taskOrder;
+}
+
+// Function to calculate task order
+const calculateTaskOrder = (tasks) => {
+  tasks.sort((a, b) => {
+    // Sort by deadlines first
+    const deadlineComparison = moment(a.deadline).diff(moment(b.deadline));
+    if (deadlineComparison !== 0) {
+      return deadlineComparison;
+    }
+
+    // Secondly by priority
+    const priorityComparison = a.priority - b.priority;
+    if (priorityComparison !== 0) {
+      return priorityComparison;
+    }
+
+    // Thirdly by speed (from small to big tasks)
+    return (
+      workingDays(a.deadline, a.requiredTime) -
+      workingDays(b.deadline, b.requiredTime)
+    );
+  });
+
+  return tasks.map((task) => task.name);
+};
+
+function workingDays(deadline, requiredTime) {
+  let currentDay = moment();
+  let workingDaysCount = 0;
+
+  while (workingDaysCount < requiredTime / OwnDate.workhours) {
+    currentDay = currentDay.add(1, "days");
+
+    // Check if the current day is a working day and not a holiday
+    if (
+      currentDay.isoWeekday() <= 5 && // Monday to Friday are working days
+      !OwnDate.holidays.includes(currentDay.format("YYYY-MM-DD"))
+    ) {
+      workingDaysCount += 1;
+    }
+  }
+
+  return moment(deadline).diff(currentDay, "days");
 }
 
 /**
@@ -22,7 +72,7 @@ function calculateScheduleLazy(tasks) {
   let schedule = [];
   let progressTime = OwnDate.getNextWorkday(new Date());
   let remainingTime = OwnDate.getTodaysRemaining();
-  
+
   console.log("Start time", progressTime);
   console.log("Today's remaining time:", remainingTime);
   tasks.forEach((task, i) => {
@@ -76,11 +126,7 @@ function calculateScheduleLazy(tasks) {
  * @param {Date} progressTime
  * @returns {Schedule}
  */
-function calculateItem(
-  task,
-  remainingTime,
-  progressTime
-) {
+function calculateItem(task, remainingTime, progressTime) {
   const startDate = new Date(progressTime);
   console.log("calculateItem startDate", startDate);
   console.log("calculateItem remainingTime", remainingTime);
@@ -121,7 +167,7 @@ function calculateItem(
     endDate: endDate,
     remainingTime: nextRemainingTime,
     timeSpent: timeSpent,
-    deadline: task.deadline
+    deadline: task.deadline,
   };
 }
 
@@ -145,11 +191,7 @@ function evaluatePriority(schedule, task) {
  * @param {number} remainingStartdayTime
  * @returns {number[]}
  */
-function calculateTimeArray(
-  startDate,
-  turnaroundTime,
-  remainingStartdayTime
-) {
+function calculateTimeArray(startDate, turnaroundTime, remainingStartdayTime) {
   console.log("calculateTimeArray startDate", startDate);
   // Single-day task
   if (turnaroundTime <= remainingStartdayTime) {
@@ -227,7 +269,6 @@ function calculateTimeArray(
   }
 }
 
-
 module.exports = {
-  calculateSchedule
+  calculateSchedule,
 };

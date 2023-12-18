@@ -1,4 +1,5 @@
 const express = require("express");
+const mongoose = require("mongoose");
 
 const bodyParser = require("body-parser");
 const HttpError = require("./models/http-error");
@@ -20,24 +21,36 @@ app.use("/api/schedule", scheduleRoutes);
 app.use("/api/users", usersRoutes);
 
 app.use((req, res, next) => {
-    return next(new HttpError("Could not find this route", 404));
+  return next(new HttpError("Could not find this route", 404));
 });
 
 // Error handling middleware
 app.use((error, req, res, next) => {
-    console.log(error);
+  console.log(error);
 
-    if (res.headerSent) {
-        // Someone already sent a response
-        return next(error);
-    }
+  if (res.headerSent) {
+    // Someone already sent a response
+    return next(error);
+  }
 
-    console.log("Error response sent:", error);
-    res.status(error.code || 500); // Set or "Something went wrong on the server"
-    res.json({ message: error.message || "An unknown error occurred!" });
+  console.log("Error response sent:", error);
+  res.status(error.code || 500); // Set or "Something went wrong on the server"
+  res.json({ message: error.message || "An unknown error occurred!" });
 });
 
-// Start the server
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-});
+// DB Connect
+
+mongoose
+  .connect(
+    "mongodb+srv://olaybence:R5pCfZO0R61dXHpV@cluster0.1pbrsck.mongodb.net/deadline_management?retryWrites=true&w=majority"
+  )
+  .then(() => {
+    console.log("Connected to database");
+    // Start the server
+    app.listen(port, () => {
+      console.log(`Server is running on port ${port}`);
+    });
+  })
+  .catch((error) => {
+    console.error("Database connection FAILED", error);
+  });

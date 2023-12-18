@@ -1,6 +1,3 @@
-// import Moment from "moment";
-const { Moment } = require('Moment');
-
 class OwnDate {
   static dayStartHour = 9;
   static dayEndHour = 17;
@@ -8,7 +5,11 @@ class OwnDate {
   static dateFormatWithHour = "YYYY-MM-DD HH:mm";
   static dateFormat = "YYYY-MM-DD";
   static dateFormatter = (date, format = OwnDate.dateFormatWithHour) =>
-    Moment(date).format(format);
+    moment(date).format(format);
+
+
+  // Sample holidays
+  static holidays = ['2023-12-25', '2023-12-26'];
 
   /**
    * convert the default getDay(): Su-0 M-1 Tu-2 We-3 Th-4 Fr-5 Sa-6

@@ -1,34 +1,88 @@
-const { v4: uuidv4 } = require("uuid");
-const { initialTasks } = require("../models/data");
-const HttpError = require("../models/http-error");
 const { validationResult } = require("express-validator");
+const mongoose = require("mongoose");
 
-let tasks = initialTasks;
+// Own Error type
+const HttpError = require("../models/http-error");
 
-const getTasks = (req, res, next) => {
-  console.log("Tasks requested.");
-  res.json(tasks);
+// DB Schema
+const Task = require("../models/task");
+const User = require("../models/user");
+
+// Controllers:
+
+// GET TASKS
+const getTasks = async (req, res, next) => {
+  let tasks;
+  try {
+    tasks = await Task.find();
+  } catch (err) {
+    console.log(err);
+    return next(
+      new HttpError("Fetching tasks failed, please try again later.", 500)
+    );
+  }
+
+  const tasksObj = tasks.map((task) => task.toObject({ getters: true }));
+  console.log("Tasks requested.", tasksObj);
+  res.status(200).json({ tasks: tasksObj });
 };
 
-const getTaskById = (req, res, next) => {
-  const taskId = req.params.taskId;
-  const task = tasks.find((t) => {
-    return t.id === taskId;
-  });
+const getTasksByUserId = async (req, res, next) => {
+  const userId = req.params.userId;
 
-  if (!task) {
+  let userWithTasks;
+  try {
+    userWithTasks = await User.findById(userId)
+      .populate({ path: "tasks" })
+      .exec();
+  } catch (err) {
+    console.log(err);
+    return next(
+      new HttpError("Fetching tasks failed, please try again later.", 500)
+    );
+  }
+
+  if (!userWithTasks || userWithTasks.tasks.length === 0) {
     return next(
       new HttpError(
-        'Could not find a task with the provided id: "' + taskId + '"',
+        "Could not find tasks for the provided user ID:" + userId,
         404
       )
     );
   }
 
-  res.json({ task });
+  const tasksObj = userWithTasks.tasks.map((task) =>
+    task.toObject({ getters: true })
+  );
+  console.log("Tasks requested.", tasksObj);
+  res.json({ tasks: tasksObj });
 };
 
-const createTask = (req, res, next) => {
+// GET TASK BY ID
+const getTaskById = async (req, res, next) => {
+  const taskId = req.params.taskId;
+
+  let task;
+  try {
+    task = await Task.findById(taskId).exec();
+  } catch (err) {
+    console.log(err);
+    return next(new HttpError("Getting tasks failed, please try again.", 500));
+  }
+
+  if (!task) {
+    return next(
+      new HttpError("Could not find a task with the provided ID", 404)
+    );
+  }
+
+  res.json({ task: task.toObject({ getters: true }) });
+};
+
+// CREATE
+const createTask = async (req, res, next) => {
+  const { name, deadline, turnaroundTime, priority, creator } = req.body;
+  console.log("createTask, req.body:", req.body);
   // Check Express-Validator
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -37,74 +91,165 @@ const createTask = (req, res, next) => {
     );
   }
 
-  const newTask = req.body;
-  newTask.id = uuidv4();
-  tasks.push(newTask); //unshift() for the first element
+  const newTask = new Task({
+    name,
+    deadline,
+    turnaroundTime,
+    priority,
+    creator,
+  });
 
-  res.status(201).json({ task: newTask });
+  let user;
+  try {
+    user = await User.findById(creator, "-password");
+  } catch (err) {
+    console.log(err);
+    return next(new HttpError("Creating task failed, please try again.", 500));
+  }
+
+  if (!user) {
+    return next(
+      new HttpError("Could not find user for provided ID:" + creator, 404)
+    );
+  }
+
+  console.log("creator exists, saving task starts");
+  console.log("user", user);
+  console.log("newTask", newTask);
+
+  try {
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    await newTask.save({ session: sess }); // Save task
+    await user.tasks.push(newTask); // Add to user
+    await user.save({ session: sess }); // Save user with added task
+
+    // Run the session, and ROLL BACK IF ANY FAILED.
+    await sess.commitTransaction();
+    sess.endSession();
+  } catch (err) {
+    console.log(err);
+    // Handle errors and roll back the transaction
+    await sess.abortTransaction();
+    sess.endSession();
+    return next(new HttpError("Creating task failed, please try again.", 500));
+  }
+
+  res.status(201).json({ task: newTask.toObject({ getters: true }) });
 };
 
-const updateTaskAtId = (req, res, next) => {
+// UPDATE
+const updateTask = async (req, res, next) => {
   // Check Express-Validator
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    console.log(errors);
     return next(
       new HttpError("Invalid inputs passed, please check your data", 422)
     );
   }
 
   const taskId = req.params.taskId;
-
-  console.log("req.params", req.params);
-  console.log("taskId", taskId);
-
   const { name, deadline, turnaroundTime, priority } = req.body;
 
-  const oldTask = tasks.find((task) => task.id === taskId);
+  let updatedTask;
+  try {
+    updatedTask = await Task.findById(taskId).exec();
+  } catch (err) {
+    console.log(err);
+    const error = new HttpError(
+      "Something went wrong, could not find place.",
+      500
+    );
+    return next(error);
+  }
 
-  if (!oldTask) {
+  if (!updatedTask) {
     return next(
       new HttpError("There is no such task with the given ID: " + taskId, 422)
     );
   }
 
   // If undefined, won't use it
-  const updatedTask = { ...oldTask };
-  updatedTask.name = name || updatedTask.name;
-  updatedTask.deadline = deadline || updatedTask.deadline;
-  updatedTask.turnaroundTime = turnaroundTime || updatedTask.turnaroundTime;
-  updatedTask.priority = priority || updatedTask.priority;
+  updatedTask.name = name;
+  updatedTask.deadline = deadline;
+  updatedTask.turnaroundTime = turnaroundTime;
+  updatedTask.priority = priority;
 
-  console.log(
-    "tasks.find((task) => task.id === taskId)",
-    tasks.find((task) => task.id === taskId)
-  );
   console.log("updatedTask", updatedTask);
 
-  tasks[taskId] = updatedTask;
-
-  res.status(200).json({ task: updatedTask });
-};
-
-const deleteTaskAtId = (req, res, next) => {
-  const taskId = req.params.taskId;
-  console.log("taskId", taskId);
-  taskToRemove = tasks.find((task) => task.id === taskId);
-  if(!taskToRemove) {
-    return next(
-        new HttpError("Could not find a place for ID: " + taskId, 422)
-      );
+  try {
+    updatedTask.save();
+  } catch (err) {
+    console.log(err);
+    const error = new HttpError(
+      "Something went wrong, could not update place.",
+      500
+    );
+    return next(error);
   }
 
-  console.log("removed task with id:", removedTask.id);
-  tasks = tasks.filter((task) => task.id !== taskId);
-  res
-    .status(200)
-    .json({ message: "Task removed successfully", task: removedTask });
+  res.status(200).json({ task: updatedTask.toObject({ getters: true }) });
+};
+
+// DELETE
+const deleteTask = async (req, res, next) => {
+  const taskId = req.params.taskId;
+  console.log("taskId", taskId);
+
+  let removedTask;
+  try {
+    removedTask = await Task.findById(taskId)
+      .populate({
+        path: "creator",
+        select: "-password", // You can specify which fields to populate
+      })
+      .exec();
+  } catch (err) {
+    console.log(err);
+    return next(
+      new HttpError("Something went wrong, could not find task.", 500)
+    );
+  }
+
+  if (!removedTask) {
+    return next(
+      new HttpError("There is no such task with the given ID: " + taskId, 422)
+    );
+  }
+
+  console.log("Try to delete task:", removedTask);
+  const sess = await mongoose.startSession();
+  sess.startTransaction();
+  try {
+    const user = removedTask.creator;
+    console.log("creator:", user);
+
+    // Delete task
+    await Task.deleteOne({ _id: removedTask._id }, { session: sess });
+
+    // Save user with added task
+    await user.save({ session: sess });
+
+    // Run the session, and ROLL BACK IF ANY FAILED.
+    await sess.commitTransaction();
+    sess.endSession();
+
+    console.log("Delete transactions committed successfully!");
+  } catch (err) {
+    // Handle errors and roll back the transaction
+    console.log(err);
+    await sess.abortTransaction();
+    sess.endSession();
+    return next(new HttpError("Something went wrong, while deleting a task.", 500));
+  }
+
+  res.status(200).json({ message: "Task removed successfully" });
 };
 
 exports.getTasks = getTasks;
+exports.getTasksByUserId = getTasksByUserId;
 exports.getTaskById = getTaskById;
 exports.createTask = createTask;
-exports.updateTaskAtId = updateTaskAtId;
-exports.deleteTaskAtId = deleteTaskAtId;
+exports.updateTask = updateTask;
+exports.deleteTask = deleteTask;
