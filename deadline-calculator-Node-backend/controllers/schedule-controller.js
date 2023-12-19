@@ -58,14 +58,15 @@ const getScheduleByUserId = async (req, res, next) => {
   res.status(200).json({ schedule: scheduleByUserObj });
 };
 
-// GET SINGLE SCHEDULE_ITEM
+//////////////////////////////////////////////////////
+// GET SINGLE SCHEDULE_ITEM //////////////////////////
 const getScheduleItemById = async (req, res, next) => {
-  const scheduleId = req.params.scheduleId;
-  console.log("getScheduleItemById id: ", scheduleId);
+  const scheduleItemId = req.params.scheduleItemId;
+  console.log("getScheduleItemById id: ", scheduleItemId);
 
   let scheduleItem;
   try {
-    scheduleItem = await ScheduleItem.findById(scheduleId);
+    scheduleItem = await ScheduleItem.findById(scheduleItemId);
   } catch (err) {
     console.log(err);
     return next(
@@ -76,7 +77,7 @@ const getScheduleItemById = async (req, res, next) => {
   if (!scheduleItem) {
     return next(
       new HttpError(
-        "Could not find schedules with the provided ID:" + scheduleId,
+        "Could not find schedules with the provided ID:" + scheduleItemId,
         404
       )
     );
@@ -115,7 +116,10 @@ const getScheduleItemByTaskId = async (req, res, next) => {
   res.status(200).json({ schedule: scheduleItemObj });
 };
 
-// EDIT SCHEDULE_ITEMS
+//////////////////////////////////////////////////////
+// EDIT SCHEDULE_ITEMS ///////////////////////////////
+
+// CREATE ////////////////////////////////////////////
 const createScheduleItem = async (req, res, next) => {
   const { userId, taskId, startDate, endDate, remainingTime, timeSpent } =
     req.body;
@@ -132,24 +136,18 @@ const createScheduleItem = async (req, res, next) => {
     );
   }
 
-  const newScheduleItem = new ScheduleItem({
-    userId,
-    taskId,
-    startDate,
-    endDate,
-    remainingTime,
-    timeSpent,
-  });
-
-  // CHECK USER
+  // Fetch data
   let user;
+  let task;
   try {
     user = await User.findById(userId, "-password");
+    task = await Task.findById(taskId);
   } catch (err) {
     console.log(err);
     return next(new HttpError("Creating task failed, please try again.", 500));
   }
 
+  // CHECK USER
   if (!user) {
     return next(
       new HttpError("Could not find user for provided ID:" + userId, 404)
@@ -157,20 +155,13 @@ const createScheduleItem = async (req, res, next) => {
   }
 
   // CHECK TASK
-  let task;
-  try {
-    task = await Task.findById(taskId);
-  } catch (err) {
-    console.log(err);
-    return next(new HttpError("Creating task failed, please try again.", 500));
-  }
-
   if (!task) {
     return next(
       new HttpError("Could not find task for provided ID:" + taskId, 404)
     );
   }
 
+  // ALREADY ASSIGNED
   if (task.schedule) {
     return next(
       new HttpError(
@@ -182,10 +173,16 @@ const createScheduleItem = async (req, res, next) => {
   }
 
   // CREATE SCHEDULE_ITEM
-  console.log("creator exists, saving task starts");
-  console.log("user", user);
-  console.log("task", task);
+  const newScheduleItem = new ScheduleItem({
+    userId,
+    taskId,
+    startDate,
+    endDate,
+    remainingTime,
+    timeSpent,
+  });
 
+  console.log("Save schedule item:", newScheduleItem);
   try {
     const sess = await mongoose.startSession();
     sess.startTransaction();
@@ -215,21 +212,126 @@ const createScheduleItem = async (req, res, next) => {
     .json({ scheduleItem: newScheduleItem.toObject({ getters: true }) });
 };
 
+// UPDATE ////////////////////////////////////////////
 const updateScheduleItem = async (req, res, next) => {
-  const scheduleItemId = req.params.taskId;
-  const { userId, taskId, startDate, endDate, remainingTime, timeSpent } =
-    req.body;
+  const scheduleItemId = req.params.scheduleItemId;
+  const { userId, startDate, endDate, remainingTime, timeSpent } = req.body;
+  // Check Express-Validator
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    console.log("errors", errors);
+    return next(
+      new HttpError("Invalid inputs passed, please check your data", 422)
+    );
+  }
 
-    // TODO: UPDATE!
-  console.log("createScheduleItem, req.body:", req.body);
+  // Find schedule item
+  let scheduleItemToUpdate;
+  let newUser;
+  try {
+    scheduleItemToUpdate = await ScheduleItem.findById(scheduleItemId)
+      .populate({
+        path: "taskId",
+      })
+      .exec();
+    newUser = await User.findById(userId);
+  } catch (err) {
+    console.log(err);
+    return next(
+      new HttpError(
+        "Something went wrong, while deleting a schedule item.",
+        500
+      )
+    );
+  }
+
+  // CHECK SCHEDULE
+  if (!scheduleItemToUpdate) {
+    return next(
+      new HttpError(
+        "The schedule item does not exists with the given ID:" + scheduleItemId,
+        401
+      )
+    );
+  }
+
+  // CHECK NEW USER
+  if (!newUser) {
+    return next(
+      new HttpError("Could not find user for provided ID:" + userId, 404)
+    );
+  }
+
+  const sess = await mongoose.startSession();
+  sess.startTransaction();
+  try {
+    const task = scheduleItemToUpdate.taskId;
+    // Update schedule item
+    task.assignedTo = newUser;
+    await task.save({ session: sess });
+
+    scheduleItemToUpdate.userId = userId;
+    scheduleItemToUpdate.startDate = startDate;
+    scheduleItemToUpdate.endDate = endDate;
+    scheduleItemToUpdate.remainingTime = remainingTime;
+    scheduleItemToUpdate.timeSpent = timeSpent;
+    await scheduleItemToUpdate.save({ session: sess });
+
+    // Run the session, and ROLL BACK IF ANY FAILED.
+    await sess.commitTransaction();
+    sess.endSession();
+
+    console.log("Delete schedule item transactions committed successfully!");
+  } catch (err) {
+    // Handle errors and roll back the transaction
+    await sess.abortTransaction();
+    sess.endSession();
+    console.log(err);
+    return next(
+      new HttpError(
+        "Something went wrong, while deleting a schedule item.",
+        500
+      )
+    );
+  }
+
+  res.status(200).json({ message: "Schedule item updated successfully!" });
 };
 
-const deleteScheduleItem = async (req, res, next) => {
-  const scheduleItemId = req.params.taskId;
+// REASSIGN //////////////////////////////////////////
+// const reassignTask = async (req, res, next) => {
+  // const taskId = req.params.taskId;
 
-  let deletScheduleItem;
+  // const { assignTo } = req.body;
+
+  // let scheduleItemToUpdate;
+  // try {
+  //   scheduleItemToUpdate = await ScheduleItem.find({ taskId: taskId }).exec();
+  // } catch (err) {
+  //   console.log(err);
+  //   const error = new HttpError(
+  //     "Something went wrong, could not find place.",
+  //     500
+  //   );
+  //   return next(error);
+  // }
+
+  // if (!scheduleItemToUpdate) {
+  //   // TODO: Create if not yet exist.
+  //   return next(
+  //     new HttpError("There is no such schedule item with the given task ID: " + taskId, 422)
+  //   );
+  // }
+// };
+
+// DELETE ////////////////////////////////////////////
+
+const deleteScheduleItem = async (req, res, next) => {
+  const scheduleItemId = req.params.scheduleItemId;
+
+  let scheduleItemToDelete;
   try {
-    deletScheduleItem = await ScheduleItem.findById(scheduleItemId)
+    scheduleItemToDelete = await ScheduleItem.findById(scheduleItemId)
       .populate({
         path: "taskId",
       })
@@ -244,7 +346,7 @@ const deleteScheduleItem = async (req, res, next) => {
     );
   }
 
-  if (!deletScheduleItem) {
+  if (!scheduleItemToDelete) {
     return next(
       new HttpError(
         "The schedule item does not exists with the given ID:" + scheduleItemId,
@@ -253,18 +355,19 @@ const deleteScheduleItem = async (req, res, next) => {
     );
   }
 
-  console.log("Try to delete schedule item:", deletScheduleItem);
+  console.log("Try to delete schedule item:", scheduleItemToDelete);
   const sess = await mongoose.startSession();
   sess.startTransaction();
   try {
-    const task = deletScheduleItem.taskId;
-    
+    const task = scheduleItemToDelete.taskId;
+
     // Delete schedule item
     await ScheduleItem.deleteOne({ _id: scheduleItemId }, { session: sess });
-    
+
     // Unassign task of the deleted schedule
     if (task) {
       task.schedule = undefined;
+      task.assignedTo = undefined;
       await task.save({ session: sess });
     }
 
@@ -286,7 +389,7 @@ const deleteScheduleItem = async (req, res, next) => {
     );
   }
 
-  res.status(200).json({ message: "Schedule item removed successfully" });
+  res.status(200).json({ message: "Schedule item removed successfully!" });
 };
 
 // EXPORTS

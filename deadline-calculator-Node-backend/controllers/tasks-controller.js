@@ -114,24 +114,12 @@ const createTask = async (req, res, next) => {
   }
 
   console.log("creator exists, saving task starts");
-  console.log("user", user);
   console.log("newTask", newTask);
 
   try {
-    const sess = await mongoose.startSession();
-    sess.startTransaction();
-    await newTask.save({ session: sess }); // Save task
-    await user.tasks.push(newTask); // Add to user
-    await user.save({ session: sess }); // Save user with added task
-
-    // Run the session, and ROLL BACK IF ANY FAILED.
-    await sess.commitTransaction();
-    sess.endSession();
+    await newTask.save(); // Save task
   } catch (err) {
     console.log(err);
-    // Handle errors and roll back the transaction
-    await sess.abortTransaction();
-    sess.endSession();
     return next(new HttpError("Creating task failed, please try again.", 500));
   }
 
@@ -241,7 +229,9 @@ const deleteTask = async (req, res, next) => {
     console.log(err);
     await sess.abortTransaction();
     sess.endSession();
-    return next(new HttpError("Something went wrong, while deleting a task.", 500));
+    return next(
+      new HttpError("Something went wrong, while deleting a task.", 500)
+    );
   }
 
   res.status(200).json({ message: "Task removed successfully" });

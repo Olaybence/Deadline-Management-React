@@ -6,6 +6,7 @@ const taskSchema = new mongoose.Schema({
   deadline: { type: Date, required: true },
   turnaroundTime: { type: Number, required: true },
   creator: { type: mongoose.Types.ObjectId, required: true, ref: "User" },
+  assignedTo: { type: mongoose.Types.ObjectId, required: false, ref: "User" },
   schedule: { type: mongoose.Types.ObjectId, required: false, ref: "ScheduleItem" },
 });
 

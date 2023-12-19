@@ -3,8 +3,6 @@ const mongoose = require("mongoose");
 const scheduleItemSchema = new mongoose.Schema({
   userId: { type: mongoose.Types.ObjectId, required: true, ref: "User" },
   taskId: { type: mongoose.Types.ObjectId, required: true, ref: "Task" },
-  // userId: { type: String, required: true, ref: "User" },
-  // taskId: { type: String, required: true, ref: "Task" },
   startDate: { type: Date, required: true },
   endDate: { type: Date, required: true },
   remainingTime: { type: Number, required: true },
